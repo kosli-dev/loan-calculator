@@ -3,7 +3,9 @@ pipeline {
 
     stages {
         stage('Setup') {
-            sh 'printenv'
+            steps {
+                sh 'printenv'
+            }
         }
         stage('Build') {
             steps {
