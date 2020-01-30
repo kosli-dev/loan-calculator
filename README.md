@@ -1,5 +1,5 @@
-# ComplianceDB Integrations
+# Loan Calculator Service
 
 ## How to use
 
-    docker run compliancedb/integrations
+    docker run compliancedb/loancalculator
