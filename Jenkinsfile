@@ -31,12 +31,14 @@ pipeline {
                 if (env.CHANGE_ID) {
                     if (pullRequest.mergeable) {
                         echo 'This pull request is mergeable'
-                        pullRequest.addLabel('Build is run to completion')
+                        pullRequest.addLabel('JenkinsBuildComplete')
+                        def comment = pullRequest.comment('This PR has been tested to the highest standards.')
+
                         // pullRequest.merge([
                         //     commitMessage : 'merge commit message here',
                         //     commitTitle : ' my title',
                         //     sha : pullRequest.head,
-                        //     mergeMethod : 'merge'
+                        //     mergeMethod : 'squash'
                         // ] )
                     } else {
                         //pullRequest.addLabel('No automerge')
