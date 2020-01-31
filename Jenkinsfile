@@ -31,6 +31,7 @@ pipeline {
                 if (env.CHANGE_ID) {
                     if (pullRequest.mergeable) {
                         echo 'This pull request is mergeable'
+                        pullRequest.addLabel('Build is run to completion')
                         // pullRequest.merge([
                         //     commitMessage : 'merge commit message here',
                         //     commitTitle : ' my title',
