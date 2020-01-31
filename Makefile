@@ -1,5 +1,5 @@
-APP    := integrations
-CONTAINER := compliancedb_integrations_1
+APP    := loancalculator
+CONTAINER := compliancedb_loancalculator_1
 REPOSITORY   := registry.gitlab.com/compliancedb/compliancedb/${APP}
 TAG    := $$(git log -1 --pretty=%h)
 IMAGE  := ${REPOSITORY}:${TAG}
