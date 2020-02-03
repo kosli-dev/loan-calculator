@@ -20,6 +20,8 @@ build:
 	@docker build -f Dockerfile -t ${IMAGE} .
 	@docker tag ${IMAGE} ${LATEST}
 
+
+
 push:
 	@docker push ${IMAGE}
 	@docker push ${LATEST}
@@ -37,8 +39,7 @@ debug: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} -it --entrypoint sh ${IMAGE}
 
 run: build
-	@echo Try this:
-	@echo docker run --rm  --name ${CONTAINER} ${IMAGE}
+	@docker run --rm  --name ${CONTAINER} ${IMAGE}
 
 # Run without tests
 cowboy: ensure_network
@@ -62,7 +63,7 @@ clean_all:
 	@docker image rm -f $$(docker image ls | grep compliancedb | tail -r | tr -s ' ' |  cut -d ' ' -f 3)
 
 test_in_docker:
-	pytest --ignore=integration_tests --capture=no
+	pytest --capture=no
 
 
 ci: build test push
