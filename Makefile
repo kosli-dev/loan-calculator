@@ -14,18 +14,22 @@ IMAGES := $(shell docker image ls --format '{{.Repository}}:{{.Tag}}' | grep $(R
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
+ensure_network:
+	docker network inspect cdb_net &>/dev/null || docker network create --driver bridge cdb_net
 
 build:
 	@echo ${IMAGE}
 	@docker build -f Dockerfile -t ${IMAGE} .
 	@docker tag ${IMAGE} ${LATEST}
 
+
+
 push:
 	@docker push ${IMAGE}
 	@docker push ${LATEST}
 
 test: ensure_network
-	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=app -v
+	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
 
 coverage:
@@ -37,8 +41,7 @@ debug: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} -it --entrypoint sh ${IMAGE}
 
 run: build
-	@echo Try this:
-	@echo docker run --rm  --name ${CONTAINER} ${IMAGE}
+	@docker run --rm  --name ${CONTAINER} ${IMAGE}
 
 # Run without tests
 cowboy: ensure_network
@@ -62,7 +65,7 @@ clean_all:
 	@docker image rm -f $$(docker image ls | grep compliancedb | tail -r | tr -s ' ' |  cut -d ' ' -f 3)
 
 test_in_docker:
-	pytest --ignore=integration_tests --capture=no
+	pytest --capture=no
 
 
 ci: build test push
