@@ -17,6 +17,20 @@ pipeline {
                 sh 'make test'
             }
         }
+        stage('Coverage') {
+            steps {
+                sh 'make coverage'
+                // publish html
+                publishHTML target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'htmlcov',
+                    reportFiles: 'index.html',
+                    reportName: 'Coverage Report'
+                ]
+            }
+        }
         stage('Security Test') {
             steps {
                 sh 'make secure'
