@@ -31,6 +31,12 @@ push:
 test: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
+ensure_project: ensure_network
+	@docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py
+
+publish_artifact: ensure_network
+	@docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} publish_artifact.py
+
 security:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./security-entrypoint.sh ${IMAGE}
 	@rm -rf build/security

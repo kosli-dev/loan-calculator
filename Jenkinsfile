@@ -10,6 +10,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'make build'
+                sh 'make ensure_project'
+                sh 'make publish_artifact'
             }
         }
         stage('Test') {
