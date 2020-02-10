@@ -14,6 +14,8 @@ IMAGES := $(shell docker image ls --format '{{.Repository}}:{{.Tag}}' | grep $(R
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
+ensure_network:
+	docker network inspect cdb_net &>/dev/null || docker network create --driver bridge cdb_net
 
 build:
 	@echo ${IMAGE}
@@ -27,7 +29,7 @@ push:
 	@docker push ${LATEST}
 
 test: ensure_network
-	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=app -v
+	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
 
 coverage:
