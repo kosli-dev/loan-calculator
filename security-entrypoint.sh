@@ -4,5 +4,4 @@
 set -e
 rm -rf build/security
 mkdir -p build/security
-pytest --ignore=integration_tests --capture=no --cov=src
-coverage html -d build/coverage
+bandit -r src -f html -o build/security/index.html

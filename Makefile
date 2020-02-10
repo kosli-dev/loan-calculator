@@ -31,12 +31,18 @@ push:
 test: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
-secure:
-	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint bandit ${IMAGE} -r src
+security:
+	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./security-entrypoint.sh ${IMAGE}
+	@rm -rf build/security
+	@mkdir -p build/security
+	@docker cp ${CONTAINER}:/code/build/security/ $(PWD)/build
+	@docker container rm ${CONTAINER}
 
 coverage:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./coverage-entrypoint.sh ${IMAGE}
-	@docker cp ${CONTAINER}:/code/htmlcov/ $(PWD)
+	@rm -rf build/coverage
+	@mkdir -p build/coverage
+	@docker cp ${CONTAINER}:/code/build/coverage/ $(PWD)/build
 	@docker container rm ${CONTAINER}
 
 debug: ensure_network

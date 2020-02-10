@@ -25,7 +25,7 @@ pipeline {
                     allowMissing: false,
                     alwaysLinkToLastBuild: false,
                     keepAll: true,
-                    reportDir: 'htmlcov',
+                    reportDir: 'build/coverage',
                     reportFiles: 'index.html',
                     reportName: 'Coverage Report'
                 ]
@@ -33,7 +33,16 @@ pipeline {
         }
         stage('Security Test') {
             steps {
-                sh 'make secure'
+                sh 'make security'
+                // publish html
+                publishHTML target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'build/security',
+                    reportFiles: 'index.html',
+                    reportName: 'Security Report'
+                ]
             }
         }
     }
