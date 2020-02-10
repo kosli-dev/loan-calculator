@@ -10,7 +10,7 @@ SERVER_PORT := 8002
 IMAGES := $(shell docker image ls --format '{{.Repository}}:{{.Tag}}' | grep $(REPOSITORY) | grep -v latest)
 
 # list the targets: from https://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile
-.PHONY: list build
+.PHONY: list build coverage
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
@@ -35,8 +35,8 @@ secure:
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint bandit ${IMAGE} -r src
 
 coverage:
-	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./entrypoint.sh ${IMAGE}
-	@docker cp ${CONTAINER}:/app/server/htmlcov /tmp/coverage
+	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./coverage-entrypoint.sh ${IMAGE}
+	@docker cp ${CONTAINER}:/code/htmlcov/ $(PWD)
 	@docker container rm ${CONTAINER}
 
 debug: ensure_network
