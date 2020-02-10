@@ -14,12 +14,12 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Testing..'
+                sh 'make test'
             }
         }
-        stage('Deploy') {
+        stage('Security Test') {
             steps {
-                echo 'Deploying....'
+                sh 'make secure'
             }
         }
     }

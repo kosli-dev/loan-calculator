@@ -31,6 +31,8 @@ push:
 test: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
+secure:
+	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint bandit ${IMAGE} -r src
 
 coverage:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./entrypoint.sh ${IMAGE}
