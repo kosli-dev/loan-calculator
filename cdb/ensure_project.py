@@ -5,7 +5,7 @@ import requests as req
 from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration, url_for_project, \
     parse_cmd_line
 
-CMD_HELP = 'ensure_project.py -p <project.json>'
+
 
 
 def main():

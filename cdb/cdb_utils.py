@@ -3,7 +3,7 @@ import sys
 
 import requests as req
 
-from ensure_project import CMD_HELP
+CMD_HELP = 'ensure_project.py -p <project.json>'
 
 
 def project_exists_in_cdb(project_data, projects):
