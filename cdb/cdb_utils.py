@@ -81,11 +81,12 @@ def rchop(thestring, ending):
 def parse_cmd_line():
     project_file = ""
     try:
-        opts, args = getopt.getopt(sys.argv, "hp:", ["project="])
+        opts, args = getopt.getopt(sys.argv[1:], "hp:", ["project="])
     except getopt.GetoptError:
         print(CMD_HELP)
         sys.exit(2)
     for opt, arg in opts:
+        print(opt + ": " + arg)
         if opt == '-h':
             print(CMD_HELP)
             sys.exit()
