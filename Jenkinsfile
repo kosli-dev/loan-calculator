@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Build') {
             environment {
-                IS_COMPLIANT = True
+                IS_COMPLIANT = "TRUE" // All artifacts in this pipeline are considered compliant for build
             }
             steps {
                 sh 'make build'
