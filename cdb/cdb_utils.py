@@ -1,3 +1,4 @@
+import getopt
 import json
 import sys
 
@@ -80,7 +81,7 @@ def rchop(thestring, ending):
 def parse_cmd_line():
     project_file = ""
     try:
-        opts, args = getopt.getopt(argv, "hp:", ["project="])
+        opts, args = getopt.getopt(sys.argv, "hp:", ["project="])
     except getopt.GetoptError:
         print(CMD_HELP)
         sys.exit(2)
