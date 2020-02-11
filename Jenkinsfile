@@ -1,6 +1,9 @@
 pipeline {
     agent any
 
+    environment {
+        CI_REGISTRY  = "registry.gitlab.com"
+    }
     stages {
         stage('Setup') {
             steps {
