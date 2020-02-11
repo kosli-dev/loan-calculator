@@ -1,0 +1,11 @@
+{
+    "name": "loancalculator-pull-requests",
+    "description": "The loan calculator application",
+    "owner": "cern",
+    "template": [
+        "artifact",
+        "test",
+        "coverage",
+        "security_scan"
+    ]
+}
