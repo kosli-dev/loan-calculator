@@ -5,11 +5,19 @@ pipeline {
         stage('Setup') {
             steps {
                 sh 'printenv'
+                withCredentials([usernamePassword(credentialsId: 'gitlab', usernameVariable: 'CI_REGISTRY_USER', passwordVariable: 'CI_REGISTRY_PASSWORD')]) {
+                    // available as an env variable, but will be masked if you try to print it out any which way
+                    // note: single quotes prevent Groovy interpolation; expansion is by Bourne Shell, which is what you want
+                    sh 'echo pwd is $PASSWORD'
+                    sh 'echo user is $CI_REGISTRY_USER'
+                }
             }
         }
         stage('Build') {
             steps {
                 sh 'make build'
+                //sh 'docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY'
+                //sh 'make push'
                 sh 'make ensure_project'
                 sh 'make publish_artifact'
             }
