@@ -45,11 +45,11 @@ test: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
 ensure_project: ensure_network
-	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py ${PROJFILE}
+	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py -p ${PROJFILE}
 
 
 publish_artifact: ensure_network
-	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net --workdir=/code/cdb --env IS_COMPLIANT=${IS_COMPLIANT} --env GIT_URL=${GIT_URL} --env JOB_DISPLAY_URL=${JOB_DISPLAY_URL} --entrypoint python ${IMAGE} publish_artifact.py ${PROJFILE}
+	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net --workdir=/code/cdb --env IS_COMPLIANT=${IS_COMPLIANT} --env GIT_URL=${GIT_URL} --env JOB_DISPLAY_URL=${JOB_DISPLAY_URL} --entrypoint python ${IMAGE} publish_artifact.py -p ${PROJFILE}
 
 
 security:
