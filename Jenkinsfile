@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                sh 'printenv'
+                sh 'printenv | sort'
                 withCredentials([usernamePassword(credentialsId: 'gitlab', usernameVariable: 'CI_REGISTRY_USER', passwordVariable: 'CI_REGISTRY_PASSWORD')]) {
                     // available as an env variable, but will be masked if you try to print it out any which way
                     // note: single quotes prevent Groovy interpolation; expansion is by Bourne Shell, which is what you want
@@ -17,6 +17,9 @@ pipeline {
             }
         }
         stage('Build') {
+            environment {
+                IS_COMPLIANT = True
+            }
             steps {
                 sh 'make build'
 

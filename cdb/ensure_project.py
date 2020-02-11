@@ -2,7 +2,7 @@
 
 import requests as req
 
-from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration
+from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration, url_for_project
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     print("Ensure Project - loading " + project_file)
     with open(project_file) as json_data_file:
         project_data = load_project_configuration(json_data_file)
-        projects_url = host + '/api/v1/projects/' + project_data["owner"] + '/'
+        projects_url = url_for_project(host, project_data)
 
         print("Fetch Project")
         # Todo write integration test for getting project that does not exist
