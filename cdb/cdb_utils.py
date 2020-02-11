@@ -1,5 +1,9 @@
 import json
+import sys
+
 import requests as req
+
+from ensure_project import CMD_HELP
 
 
 def project_exists_in_cdb(project_data, projects):
@@ -71,3 +75,19 @@ def rchop(thestring, ending):
     if thestring.endswith(ending):
         return thestring[:-len(ending)]
     return thestring
+
+
+def parse_cmd_line():
+    project_file = ""
+    try:
+        opts, args = getopt.getopt(argv, "hp:", ["project="])
+    except getopt.GetoptError:
+        print(CMD_HELP)
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print(CMD_HELP)
+            sys.exit()
+        elif opt in ("-p", "--project"):
+            project_file = arg
+    return project_file
