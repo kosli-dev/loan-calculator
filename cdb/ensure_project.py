@@ -2,18 +2,20 @@
 
 import requests as req
 
-from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration, url_for_project
+from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration, url_for_project, \
+    parse_cmd_line
+
+
 
 
 def main():
     """
-    host
     project.json
     """
 
-    #TODO parameterize later
+    # TODO parameterize later
     host = "http://hub"
-    project_file = "project.json"
+    project_file = parse_cmd_line()
 
     print("Ensure Project - loading " + project_file)
     with open(project_file) as json_data_file:
@@ -33,9 +35,9 @@ def main():
         create_response = req.put(projects_url, json=project_data)
         print(create_response.text)
 
-    #print("If template differs then update template")
+    # print("If template differs then update template")
 
-    #print("If description differs then update description")
+    # print("If description differs then update description")
 
 
 if __name__ == '__main__':

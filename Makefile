@@ -6,6 +6,15 @@ IMAGE  := ${REPOSITORY}:${TAG}
 LATEST := ${REPOSITORY}:latest
 SERVER_PORT := 8002
 
+ifeq ($(BRANCH_NAME),master)
+	IS_MASTER=TRUE
+	PROJFILE=project-master.json
+else
+	IS_MASTER=FALSE
+	PROJFILE=project-pull-requests.json
+endif
+
+
 # all non-latest images - for prune target
 IMAGES := $(shell docker image ls --format '{{.Repository}}:{{.Tag}}' | grep $(REPOSITORY) | grep -v latest)
 
@@ -23,6 +32,10 @@ build:
 	@docker tag ${IMAGE} ${LATEST}
 
 
+branch:
+	@echo Branch is ${BRANCH_NAME}
+	@echo IS_MASTER is ${IS_MASTER}
+	@echo PROJFILE is ${PROJFILE}
 
 push:
 	@docker push ${IMAGE}
@@ -32,10 +45,12 @@ test: ensure_network
 	@docker run --rm -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint pytest ${IMAGE} -rA --ignore=integration_tests --capture=no --cov=src -v
 
 ensure_project: ensure_network
-	@docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py
+	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py -p ${PROJFILE}
+
 
 publish_artifact: ensure_network
-	@docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net --workdir=/code/cdb --env IS_COMPLIANT=${IS_COMPLIANT} --env GIT_URL=${GIT_URL} --env JOB_DISPLAY_URL=${JOB_DISPLAY_URL} --entrypoint python ${IMAGE} publish_artifact.py
+	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net --workdir=/code/cdb --env IS_COMPLIANT=${IS_COMPLIANT} --env GIT_URL=${GIT_URL} --env JOB_DISPLAY_URL=${JOB_DISPLAY_URL} --entrypoint python ${IMAGE} publish_artifact.py -p ${PROJFILE}
+
 
 security:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./security-entrypoint.sh ${IMAGE}

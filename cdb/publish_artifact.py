@@ -5,7 +5,7 @@ import json
 import os
 import docker
 
-from cdb_utils import create_artifact, rchop
+from cdb_utils import create_artifact, rchop, parse_cmd_line
 
 DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 
@@ -13,7 +13,7 @@ DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 def main():
     # TODO parameterize later
     host = "http://hub"
-    project_file = "project.json"
+    project_file = parse_cmd_line()
 
     print("Get the SHA for the docker image")
     client = docker.from_env()
