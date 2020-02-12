@@ -6,7 +6,11 @@ IMAGE  := ${REPOSITORY}:${TAG}
 LATEST := ${REPOSITORY}:latest
 SERVER_PORT := 8002
 
-ifeq ($(BRANCH_NAME),master)
+#ifeq ($(BRANCH_NAME),master)
+
+MASTER_BRANCH := master
+# Check if branch ends with master, i.e. match origin/master AND master
+ifeq ($(patsubst %$(MASTER_BRANCH),,$(lastword $(BRANCH_NAME))),)
 	IS_MASTER=TRUE
 	PROJFILE=project-master.json
 else
