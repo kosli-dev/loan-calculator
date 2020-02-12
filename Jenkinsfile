@@ -118,6 +118,13 @@ pipeline {
                 }
                 else {
                     echo "This is not a pull request"
+                    echo "Checking ${GIT_BRANCH} is origin/master"
+                    if (env.GIT_BRANCH == "origin/master") {
+                        echo "IS MASTER!!!"
+                        echo "Checking code review approved"
+                        commitMsgHead = sh(returnStdout: true, script: "git log --oneline -n 1").trim()
+                        echo "Commit head is ${commitMsgHead}"
+                    }
                 }
             }
         }
