@@ -69,7 +69,7 @@ add_evidence: ensure_network
 	        --workdir=/code/cdb \
 	        --env IS_COMPLIANT=${IS_COMPLIANT} \
 	        --env EVIDENCE_TYPE=${EVIDENCE_TYPE} \
-	        --env DESCRIPTION=${DESCRIPTION} \
+	        --env DESCRIPTION="${DESCRIPTION}" \
 	        --env BUILD_TAG=${BUILD_TAG} \
 	        --env URL=${URL} \
 	        --entrypoint python \
