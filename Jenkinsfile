@@ -79,7 +79,7 @@ pipeline {
                 script{
                     env.URL = "${env.JOB_URL}/Security_20Report/"
                     env.IS_COMPLIANT = "TRUE"
-                    env.EVIDENCE_TYPE = "security"
+                    env.EVIDENCE_TYPE = "security_scan"
                     env.DESCRIPTION = "Security scan report"
                 }
                 sh 'make add_evidence'
