@@ -53,6 +53,14 @@ pipeline {
                     reportFiles: 'index.html',
                     reportName: 'Coverage Report'
                 ]
+
+                script{
+                    env.URL = "${env.JOB_URL}/Coverage_20Report/"
+                    env.IS_COMPLIANT = "TRUE"
+                    env.EVIDENCE_TYPE = "coverage"
+                    env.DESCRIPTION = "Test coverage report"
+                }
+                sh 'make add_evidence'
             }
         }
         stage('Security Test') {

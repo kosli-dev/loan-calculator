@@ -58,14 +58,28 @@ def create_artifact(host, project_config_file, sha256, filename, description, gi
         "build_url": build_url,
         "is_compliant": is_compliant
     }
-    url_for_artifact = url_for_project(host, project_data) + project_data["name"] + '/artifacts/'
-    headers = {"Content-Type": "application/json"}
+    url = url_for_artifacts(host, project_data)
+    put_payload(create_artifact_payload, url)
 
+
+def put_payload(payload, url):
+    headers = {"Content-Type": "application/json"}
     print("Putting this payload:")
-    print(json.dumps(create_artifact_payload, sort_keys=True, indent=4))
-    print("To url: " + url_for_artifact)
-    resp = req.put(url_for_artifact, data=json.dumps(create_artifact_payload), headers=headers)
+    print(json.dumps(payload, sort_keys=True, indent=4))
+    print("To url: " + url)
+    resp = req.put(url, data=json.dumps(payload), headers=headers)
     print(resp.text)
+
+
+def url_for_artifacts(host, project_data):
+    return url_for_project(host, project_data) + project_data["name"] + '/artifacts/'
+
+
+def add_evidence(host, project_file_contents, sha256_digest, evidence):
+    project_data = load_project_configuration(project_file_contents)
+    url_for_artifact = url_for_artifacts(host, project_data) + sha256_digest
+
+    put_payload(evidence, url_for_artifact)
 
 
 def url_for_project(host, project_data):

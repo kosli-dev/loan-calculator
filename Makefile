@@ -64,6 +64,18 @@ publish_artifact: ensure_network
 	        ${IMAGE} publish_artifact.py -p ${PROJFILE}
 
 
+add_evidence: ensure_network
+	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net \
+	        --workdir=/code/cdb \
+	        --env IS_COMPLIANT=${IS_COMPLIANT} \
+	        --env EVIDENCE_TYPE=${EVIDENCE_TYPE} \
+	        --env DESCRIPTION=${DESCRIPTION} \
+	        --env BUILD_TAG=${BUILD_TAG} \
+	        --env URL=${URL} \
+	        --entrypoint python \
+	        ${IMAGE} add_evidence.py -p ${PROJFILE}
+
+
 security:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./security-entrypoint.sh ${IMAGE}
 	@rm -rf build/security
