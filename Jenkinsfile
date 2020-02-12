@@ -75,6 +75,14 @@ pipeline {
                     reportFiles: 'index.html',
                     reportName: 'Security Report'
                 ]
+
+                script{
+                    env.URL = "${env.JOB_URL}/Security_20Report/"
+                    env.IS_COMPLIANT = "TRUE"
+                    env.EVIDENCE_TYPE = "security"
+                    env.DESCRIPTION = "Security scan report"
+                }
+                sh 'make add_evidence'
             }
         }
     }
