@@ -39,6 +39,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'make test'
+                junit 'build/test/**/*.xml'
             }
         }
         stage('Coverage') {
@@ -55,7 +56,7 @@ pipeline {
                 ]
 
                 script{
-                    env.URL = "${env.JOB_URL}/Coverage_20Report/"
+                    env.URL = "${env.JOB_URL}Coverage_20Report/"
                     env.IS_COMPLIANT = "TRUE"
                     env.EVIDENCE_TYPE = "coverage"
                     env.DESCRIPTION = "Test coverage report"
@@ -77,7 +78,7 @@ pipeline {
                 ]
 
                 script{
-                    env.URL = "${env.JOB_URL}/Security_20Report/"
+                    env.URL = "${env.JOB_URL}Security_20Report/"
                     env.IS_COMPLIANT = "TRUE"
                     env.EVIDENCE_TYPE = "security_scan"
                     env.DESCRIPTION = "Security scan report"
