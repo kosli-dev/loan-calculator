@@ -124,6 +124,7 @@ pipeline {
                         echo "Checking code review approved"
                         commitMsgHead = sh(returnStdout: true, script: "git log --oneline -n 1").trim()
                         echo "Commit head is ${commitMsgHead}"
+                        sh 'make ensure_review'
                     }
                 }
             }

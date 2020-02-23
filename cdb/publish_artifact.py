@@ -12,7 +12,7 @@ DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 
 def main():
     # TODO parameterize later
-    host = "http://hub"
+    host = "http://nginx"
     project_file = parse_cmd_line()
 
     print("Get the SHA for the docker image")
