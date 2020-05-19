@@ -8,8 +8,7 @@ from cdb_utils import parse_cmd_line
 
 
 def main():
-    # TODO parameterize later
-    host = "http://server:8001"
+
     project_file = parse_cmd_line()
 
     # get git commit header

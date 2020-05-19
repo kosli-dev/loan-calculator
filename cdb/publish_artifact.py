@@ -11,8 +11,6 @@ DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 
 
 def main():
-    # TODO parameterize later
-    host = "http://server:8001"
     project_file = parse_cmd_line()
 
     print("Get the SHA for the docker image")
@@ -35,7 +33,7 @@ def main():
     is_compliant = os.getenv('IS_COMPLIANT', "FALSE") == "TRUE"
 
     with open(project_file) as project_file_contents:
-        create_artifact(host, project_file_contents, sha256_digest, DOCKER_IMAGE, description, git_commit, commit_url, build_url,
+        create_artifact(CDB_SERVER, project_file_contents, sha256_digest, DOCKER_IMAGE, description, git_commit, commit_url, build_url,
                     is_compliant)
 
 if __name__ == '__main__':

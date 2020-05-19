@@ -4,23 +4,19 @@ import requests as req
 
 from cdb_utils import project_exists_in_cdb, get_project_list_from_cdb, load_project_configuration, url_for_project, \
     parse_cmd_line
-
-
+from settings import CDB_SERVER
 
 
 def main():
     """
     project.json
     """
-
-    # TODO parameterize later
-    host = "http://server:8001"
     project_file = parse_cmd_line()
 
     print("Ensure Project - loading " + project_file)
     with open(project_file) as json_data_file:
         project_data = load_project_configuration(json_data_file)
-        projects_url = url_for_project(host, project_data)
+        projects_url = url_for_project(CDB_SERVER, project_data)
 
         print("Fetch Project")
         # Todo write integration test for getting project that does not exist
@@ -35,9 +31,6 @@ def main():
         create_response = req.put(projects_url, json=project_data)
         print(create_response.text)
 
-    # print("If template differs then update template")
-
-    # print("If description differs then update description")
 
 
 if __name__ == '__main__':
