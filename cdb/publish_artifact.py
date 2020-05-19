@@ -6,6 +6,7 @@ import os
 import docker
 
 from cdb_utils import create_artifact, rchop, parse_cmd_line
+from settings import CDB_SERVER
 
 DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 
@@ -35,6 +36,7 @@ def main():
     with open(project_file) as project_file_contents:
         create_artifact(CDB_SERVER, project_file_contents, sha256_digest, DOCKER_IMAGE, description, git_commit, commit_url, build_url,
                     is_compliant)
+
 
 if __name__ == '__main__':
     main()

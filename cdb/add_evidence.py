@@ -6,7 +6,7 @@ import os
 import docker
 
 from cdb_utils import create_artifact, rchop, parse_cmd_line, add_evidence
-
+from settings import CDB_SERVER
 DOCKER_IMAGE = "registry.gitlab.com/compliancedb/compliancedb/loancalculator"
 
 
