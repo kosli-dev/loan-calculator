@@ -9,7 +9,7 @@ from cdb_utils import parse_cmd_line
 
 def main():
     # TODO parameterize later
-    host = "http://nginx"
+    host = "http://server"
     project_file = parse_cmd_line()
 
     # get git commit header
