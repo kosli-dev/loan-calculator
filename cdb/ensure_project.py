@@ -14,7 +14,7 @@ def main():
     """
 
     # TODO parameterize later
-    host = "http://:8001"
+    host = "http://server:8001"
     project_file = parse_cmd_line()
 
     print("Ensure Project - loading " + project_file)
