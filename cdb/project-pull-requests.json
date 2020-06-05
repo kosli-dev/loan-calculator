@@ -2,6 +2,7 @@
     "name": "loancalculator-pull-requests",
     "description": "The loan calculator application",
     "owner": "meekrosoft",
+    "visibility": "public",
     "template": [
         "artifact",
         "test",
