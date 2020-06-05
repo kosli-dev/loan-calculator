@@ -1,1 +1,1 @@
-CDB_SERVER = "http://server:8001"
+CDB_SERVER = "https://app.compliancedb.com"
