@@ -1,4 +1,4 @@
-name: Create deployment approval
+name: Deploy to production
 on:
   workflow_dispatch:
 
@@ -6,6 +6,10 @@ on:
 jobs:
   production-deploy:
     # This is a manually triggered workflow to deploy to production
+    # Runs from production branch
+    # Do deploy
+    # Log deploy
+    # Merge with master
     runs-on: ubuntu-latest
     steps:
     - env:
@@ -14,7 +18,7 @@ jobs:
         MERKELY_ENVIRONMENT: staging
         MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
       run: |
-        make pull
+        make docker_pull
         echo YOUR DEPLOYMENT COMMAND HERE
         export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
         make merkely_log_deployment
