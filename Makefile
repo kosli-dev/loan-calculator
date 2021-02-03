@@ -1,6 +1,6 @@
 APP    := loancalculator
-CONTAINER := compliancedb_loancalculator_1
-REPOSITORY   := registry.gitlab.com/compliancedb/compliancedb/${APP}
+CONTAINER := merkely_loancalculator_1
+REPOSITORY   := merkely/${APP}
 TAG    := $$(git log -1 --pretty=%h)
 IMAGE  := ${REPOSITORY}:${TAG}
 LATEST := ${REPOSITORY}:latest
@@ -41,7 +41,11 @@ branch:
 	@echo IS_MASTER is ${IS_MASTER}
 	@echo PROJFILE is ${PROJFILE}
 
-push:
+
+docker_login:
+	@echo ${DOCKER_DEPLOY_TOKEN} | docker login --username ${DOCKER_DEPLOY_USERNAME} --password-stdin
+
+docker_push:
 	@docker push ${IMAGE}
 	@docker push ${LATEST}
 
