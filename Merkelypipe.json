@@ -4,6 +4,7 @@
     "owner": "meekrosoft",
     "visibility": "public",
     "template": [
-        "artifact"
+        "artifact",
+        "unit_test"
     ]
 }
