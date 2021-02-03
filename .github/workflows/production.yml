@@ -20,6 +20,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        # fetch full history
+        fetch-depth: 0
         ref: ${{ github.event.inputs.deploy_commit }}
 
     - env:
