@@ -32,6 +32,9 @@ jobs:
         echo YOUR DEPLOYMENT COMMAND HERE
         export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
         make merkely_log_deployment
+        git checkout production
+        git merge ${{ github.event.inputs.deploy_commit }}
+        git push origin production
 
 
 
