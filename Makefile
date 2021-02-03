@@ -44,8 +44,6 @@ test: ensure_network
 	@docker cp ${CONTAINER}:/code/build/test/ $(PWD)/build
 	@docker container rm ${CONTAINER}
 
-ensure_project: ensure_network
-	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py -p ${MERKELYPIPE}
 
 
 publish_artifact: ensure_network
@@ -141,7 +139,7 @@ merkely_declare_pipeline:
 			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
 			--env MERKELY_HOST=https://app.compliancedb.com \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			${IMAGE}
+			merkely/change
 
 merkely_log_artifact:
 	docker run --rm \
@@ -157,4 +155,4 @@ merkely_log_artifact:
 			--env MERKELY_HOST=https://app.compliancedb.com \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			--volume=/var/run/docker.sock:/var/run/docker.sock \
-			${IMAGE}
+			merkely/change
