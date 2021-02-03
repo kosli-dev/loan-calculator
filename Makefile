@@ -82,6 +82,18 @@ merkely_log_test:
 			--volume ${PWD}/build/test/pytest_unit.xml:/data/junit/junit.xml \
 			merkely/change python -m cdb.control_junit -p /Merkelypipe.json
 
+merkely_log_deployment:
+	docker run \
+        --env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+        --env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+        --env CDB_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
+        --env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+        --env CDB_DESCRIPTION="Deployed to ${MERKELY_ENVIRONMENT} in pipeline" \
+		--rm \
+        --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        ${IMAGE} python -m cdb.create_deployment -p /Merkelypipe.json
+
 
 # Re-validate targets below this comment
 
