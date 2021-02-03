@@ -1,21 +1,21 @@
-name: Manually triggered workflow
+name: Create deployment approval
 on:
   workflow_dispatch:
-    inputs:
-      name:
-        description: 'Person to greet'
-        required: true
-        default: 'Mona the Octocat'
-      home:
-        description: 'location'
-        required: false
-        default: 'The Octoverse'
+
 
 jobs:
-  say_hello:
+  production-deploy:
+    # This is a manually triggered workflow to deploy to production
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        env
-        echo "Hello ${{ github.event.inputs.name }}!"
-        echo "- in ${{ github.event.inputs.home }}!"
+    - env:
+        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+        MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+        MERKELY_ENVIRONMENT: staging
+        MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
+      run: |
+        make pull
+        echo YOUR DEPLOYMENT COMMAND HERE
+        export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
+        make merkely_log_deployment
+

@@ -37,6 +37,9 @@ docker_push:
 	@docker push ${IMAGE}
 	@docker push ${LATEST}
 
+docker_pull:
+	@docker pull ${IMAGE}
+
 test:
 	@docker run --name ${CONTAINER} --entrypoint ./test-entrypoint.sh ${IMAGE}
 	@rm -rf build/test
@@ -88,7 +91,7 @@ merkely_log_deployment:
         --env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
         --env CDB_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
         --env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-        --env CDB_DESCRIPTION="Deployed to ${MERKELY_ENVIRONMENT} in pipeline" \
+        --env CDB_DESCRIPTION=${MERKELY_DESCRIPTION} \
 		--rm \
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
         --volume=/var/run/docker.sock:/var/run/docker.sock \
