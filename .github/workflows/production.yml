@@ -1,7 +1,11 @@
 name: Deploy to production
 on:
   workflow_dispatch:
-
+    inputs:
+      deploy_commit:
+        description: 'Git commit-ish to deploy'
+        required: true
+        default: 'master'
 
 jobs:
   production-deploy:
@@ -16,18 +20,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: production
+        ref: ${{ github.event.inputs.deploy_commit }}
 
     - env:
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-        MERKELY_ENVIRONMENT: staging
+        MERKELY_ENVIRONMENT: production
         MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
       run: |
-        ls -al
-        git status
         make docker_pull
         echo YOUR DEPLOYMENT COMMAND HERE
         export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
         make merkely_log_deployment
+
+
 
