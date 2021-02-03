@@ -26,9 +26,13 @@ jobs:
           DOCKER_DEPLOY_TOKEN: ${{ secrets.DOCKER_DEPLOY_TOKEN }}
           DOCKER_DEPLOY_USERNAME: ${{ secrets.DOCKER_DEPLOY_USERNAME }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_ARTIFACT_GIT_URL: https://github.com/compliancedb/cdb_controls/commit/${GITHUB_SHA}
+          MERKELY_ARTIFACT_GIT_COMMIT: ${GITHUB_SHA}
+          MERKELY_CI_BUILD_URL: https://github.com/compliancedb/cdb_controls/actions/runs/${GITHUB_RUN_ID}
+          MERKELY_CI_BUILD_NUMBER: ${GITHUB_RUN_ID}
         run: |
           make build
           make docker_login
           make docker_push
           make merkely_declare_pipeline
-          # make merkely_log_artifact
+          make merkely_log_artifact
