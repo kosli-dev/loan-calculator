@@ -136,7 +136,7 @@ ci: build test push
 merkely_declare_pipeline:
 	docker run --rm \
 			--env MERKELY_COMMAND=declare_pipeline \
-			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+			--env MERKELY_API_TOKEN="${MERKELY_API_TOKEN}" \
 			--env MERKELY_HOST=https://app.compliancedb.com \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			merkely/change
@@ -151,7 +151,7 @@ merkely_log_artifact:
 			--env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \
 			--env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
 			--env MERKELY_CI_BUILD_NUMBER=${MERKELY_CI_BUILD_NUMBER} \
-			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+			--env MERKELY_API_TOKEN="${MERKELY_API_TOKEN}" \
 			--env MERKELY_HOST=https://app.compliancedb.com \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			--volume=/var/run/docker.sock:/var/run/docker.sock \
