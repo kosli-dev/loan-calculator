@@ -24,6 +24,8 @@ jobs:
         MERKELY_ENVIRONMENT: staging
         MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
       run: |
+        ls -al
+        git status
         make docker_pull
         echo YOUR DEPLOYMENT COMMAND HERE
         export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
