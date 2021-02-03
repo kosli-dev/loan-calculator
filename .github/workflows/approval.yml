@@ -1,0 +1,34 @@
+name: Create approval
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_commit:
+        description: 'Git commit-ish to approve'
+        required: true
+        default: 'master'
+
+jobs:
+  merkely_approval:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        # fetch full history
+        fetch-depth: 0
+        ref: ${{ github.event.inputs.deploy_commit }}
+
+    - env:
+        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+        MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+        MERKELY_ENVIRONMENT: production
+        MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
+        MERKELY_TARGET_SOURCE_COMMITISH: ${{ github.event.inputs.deploy_commit }}
+        MERKELY_BASE_SOURCE_COMMITISH: origin/production
+      run: |
+        make docker_pull
+        make merkely_create_approval
+
+
+
+
