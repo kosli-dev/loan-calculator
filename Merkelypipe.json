@@ -4,9 +4,6 @@
     "owner": "meekrosoft",
     "visibility": "public",
     "template": [
-        "artifact",
-        "test",
-        "coverage",
-        "security_scan"
+        "artifact"
     ]
 }

@@ -25,7 +25,10 @@ jobs:
         env:
           DOCKER_DEPLOY_TOKEN: ${{ secrets.DOCKER_DEPLOY_TOKEN }}
           DOCKER_DEPLOY_USERNAME: ${{ secrets.DOCKER_DEPLOY_USERNAME }}
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           make build
           make docker_login
           make docker_push
+          make merkely_declare_pipeline
+          # make merkely_log_artifact

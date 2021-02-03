@@ -5,18 +5,7 @@ TAG    := $$(git log -1 --pretty=%h)
 IMAGE  := ${REPOSITORY}:${TAG}
 LATEST := ${REPOSITORY}:latest
 SERVER_PORT := 8002
-
-#ifeq ($(BRANCH_NAME),master)
-
-MASTER_BRANCH := master
-# Check if branch ends with master, i.e. match origin/master AND master
-ifeq ($(patsubst %$(MASTER_BRANCH),,$(lastword $(BRANCH_NAME))),)
-	IS_MASTER=TRUE
-	PROJFILE=project-master.json
-else
-	IS_MASTER=FALSE
-	PROJFILE=project-pull-requests.json
-endif
+MERKELYPIPE=Merkelypipe.json
 
 
 # all non-latest images - for prune target
@@ -38,8 +27,7 @@ build:
 
 branch:
 	@echo Branch is ${BRANCH_NAME}
-	@echo IS_MASTER is ${IS_MASTER}
-	@echo PROJFILE is ${PROJFILE}
+	@echo MERKELYPIPE is ${MERKELYPIPE}
 
 
 docker_login:
@@ -57,7 +45,7 @@ test: ensure_network
 	@docker container rm ${CONTAINER}
 
 ensure_project: ensure_network
-	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py -p ${PROJFILE}
+	docker run --rm --name ${CONTAINER} --network cdb_net --workdir=/code/cdb --entrypoint python ${IMAGE} ensure_project.py -p ${MERKELYPIPE}
 
 
 publish_artifact: ensure_network
@@ -69,7 +57,7 @@ publish_artifact: ensure_network
 	        --env JOB_DISPLAY_URL=${JOB_DISPLAY_URL} \
 	        --env BUILD_TAG=${BUILD_TAG} \
 	        --entrypoint python \
-	        ${IMAGE} publish_artifact.py -p ${PROJFILE}
+	        ${IMAGE} publish_artifact.py -p ${MERKELYPIPE}
 
 
 add_evidence: ensure_network
@@ -81,7 +69,7 @@ add_evidence: ensure_network
 	        --env BUILD_TAG=${BUILD_TAG} \
 	        --env URL=${URL} \
 	        --entrypoint python \
-	        ${IMAGE} add_evidence.py -p ${PROJFILE}
+	        ${IMAGE} add_evidence.py -p ${MERKELYPIPE}
 
 ensure_review: ensure_network
 	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net \
@@ -92,7 +80,7 @@ ensure_review: ensure_network
 	        --env BUILD_TAG=${BUILD_TAG} \
 	        --env URL=${URL} \
 	        --entrypoint python \
-	        ${IMAGE} add_evidence.py -p ${PROJFILE}
+	        ${IMAGE} add_evidence.py -p ${MERKELYPIPE}
 
 
 security:
@@ -142,3 +130,31 @@ test_in_docker:
 
 ci: build test push
 	@echo "Building testing pushing"
+
+
+
+# Re-validate targets above this comment
+
+merkely_declare_pipeline:
+	docker run --rm \
+			--env MERKELY_COMMAND=declare_pipeline \
+			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+			--env MERKELY_HOST=https://app.compliancedb.com \
+			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+			${IMAGE}
+
+merkely_log_artifact:
+	docker run --rm \
+			--env MERKELY_COMMAND=log_artifact \
+			--env MERKELY_FINGERPRINT="docker://${MERKELY_DOCKER_IMAGE}" \
+			--env MERKELY_DISPLAY_NAME=${MERKELY_DOCKER_IMAGE} \
+			--env MERKELY_IS_COMPLIANT=${MERKELY_IS_COMPLIANT} \
+			--env MERKELY_ARTIFACT_GIT_URL=${MERKELY_ARTIFACT_GIT_URL} \
+			--env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \
+			--env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+			--env MERKELY_CI_BUILD_NUMBER=${MERKELY_CI_BUILD_NUMBER} \
+			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+			--env MERKELY_HOST=https://app.compliancedb.com \
+			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+			--volume=/var/run/docker.sock:/var/run/docker.sock \
+			${IMAGE}
