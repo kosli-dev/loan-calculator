@@ -92,7 +92,7 @@ merkely_log_deployment:
 		--rm \
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
         --volume=/var/run/docker.sock:/var/run/docker.sock \
-        ${IMAGE} python -m cdb.create_deployment -p /Merkelypipe.json
+        merkely/change python -m cdb.create_deployment -p /Merkelypipe.json
 
 
 # Re-validate targets below this comment
