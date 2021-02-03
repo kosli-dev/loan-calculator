@@ -81,7 +81,7 @@ merkely_log_test:
 			--env CDB_EVIDENCE_TYPE=unit_test \
 			--rm \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			--volume=/var/run/docker.sock:/var/run/docker.sock \
+			--volume /var/run/docker.sock:/var/run/docker.sock \
 			--volume ${PWD}/build/test/pytest_unit.xml:/data/junit/junit.xml \
 			merkely/change python -m cdb.control_junit -p /Merkelypipe.json
 
@@ -94,10 +94,21 @@ merkely_log_deployment:
         --env CDB_DESCRIPTION="${MERKELY_DESCRIPTION}" \
 		--rm \
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
         merkely/change python -m cdb.create_deployment -p /Merkelypipe.json
 
-
+merkely_create_approval:
+	docker run \
+			--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+			--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+			--env CDB_TARGET_SRC_COMMITISH=${MERKELY_TARGET_SOURCE_COMMITISH} \
+			--env CDB_BASE_SRC_COMMITISH=${MERKELY_BASE_SOURCE_COMMITISH} \
+			--env CDB_RELEASE_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+			--rm \
+			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+			--volume /var/run/docker.sock:/var/run/docker.sock \
+			--volume ${PWD}:/src \
+			merkely/change python -m cdb.create_release -p /Merkelypipe.json
 # Re-validate targets below this comment
 
 
