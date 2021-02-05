@@ -47,6 +47,16 @@ test:
 	@docker cp ${CONTAINER}:/code/build/test/ $(PWD)/build
 	@docker container rm ${CONTAINER}
 
+security:
+	@docker rm --force $@ 2> /dev/null || true
+	@rm -rf build/security
+	@mkdir -p build/security
+	@docker run \
+			--name $@ \
+			--rm \
+			--volume ${PWD}/build:/code/build \
+			--entrypoint ./security-entrypoint.sh \
+			${IMAGE}
 
 merkely_declare_pipeline:
 	docker run --rm \
@@ -78,11 +88,11 @@ merkely_log_test:
 			--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
 			--env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
 			--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-			--env CDB_EVIDENCE_TYPE=unit_test \
+			--env CDB_EVIDENCE_TYPE=${MERKELY_TEST_TYPE} \
 			--rm \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			--volume /var/run/docker.sock:/var/run/docker.sock \
-			--volume ${PWD}/build/test/pytest_unit.xml:/data/junit/junit.xml \
+			--volume ${PWD}/${MERKELY_TEST_RESULTS}:/data/junit/junit.xml \
 			merkely/change python -m cdb.control_junit -p /Merkelypipe.json
 
 merkely_log_deployment:
@@ -109,39 +119,11 @@ merkely_create_approval:
 			--volume /var/run/docker.sock:/var/run/docker.sock \
 			--volume ${PWD}:/src \
 			merkely/change python -m cdb.create_release -p /Merkelypipe.json
+
+
 # Re-validate targets below this comment
 
 
-
-add_evidence: ensure_network
-	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net \
-	        --workdir=/code/cdb \
-	        --env IS_COMPLIANT=${IS_COMPLIANT} \
-	        --env EVIDENCE_TYPE=${EVIDENCE_TYPE} \
-	        --env DESCRIPTION="${DESCRIPTION}" \
-	        --env BUILD_TAG=${BUILD_TAG} \
-	        --env URL=${URL} \
-	        --entrypoint python \
-	        ${IMAGE} add_evidence.py -p ${MERKELYPIPE}
-
-ensure_review: ensure_network
-	docker run --rm --name ${CONTAINER} --volume=/var/run/docker.sock:/var/run/docker.sock --network cdb_net \
-	        --workdir=/code/cdb \
-	        --env IS_COMPLIANT=${IS_COMPLIANT} \
-	        --env EVIDENCE_TYPE=${EVIDENCE_TYPE} \
-	        --env DESCRIPTION="${DESCRIPTION}" \
-	        --env BUILD_TAG=${BUILD_TAG} \
-	        --env URL=${URL} \
-	        --entrypoint python \
-	        ${IMAGE} add_evidence.py -p ${MERKELYPIPE}
-
-
-security:
-	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./security-entrypoint.sh ${IMAGE}
-	@rm -rf build/security
-	@mkdir -p build/security
-	@docker cp ${CONTAINER}:/code/build/security/ $(PWD)/build
-	@docker container rm ${CONTAINER}
 
 coverage:
 	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./coverage-entrypoint.sh ${IMAGE}

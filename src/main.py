@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 
+def load_unsafe_yaml():
+    import yaml
+    # Uncomment this line to create a security issue
+    # yaml.load("yaml_str")
+
 def main():
     print("Loan calculator")
 

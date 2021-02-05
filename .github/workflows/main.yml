@@ -41,9 +41,21 @@ jobs:
         env:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          MERKELY_TEST_TYPE: unit_test
+          MERKELY_TEST_RESULTS: build/test/pytest_unit.xml
         run: |
           make test
           #make merkely_log_test
+
+      - name: Run security analysis
+        env:
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          MERKELY_TEST_TYPE: security
+          MERKELY_TEST_RESULTS: build/security/security.xml
+        run: |
+          make security
+          make merkely_log_test
 
       - name: Deploy to STAGE
         env:

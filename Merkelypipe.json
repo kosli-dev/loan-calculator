@@ -5,6 +5,7 @@
     "visibility": "public",
     "template": [
         "artifact",
-        "unit_test"
+        "unit_test",
+        "security"
     ]
 }
