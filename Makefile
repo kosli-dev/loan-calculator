@@ -140,7 +140,7 @@ merkely_create_approval:
 			--env CDB_TARGET_SRC_COMMITISH=${MERKELY_TARGET_SOURCE_COMMITISH} \
 			--env CDB_BASE_SRC_COMMITISH=${MERKELY_BASE_SOURCE_COMMITISH} \
 			--env CDB_RELEASE_DESCRIPTION="${MERKELY_DESCRIPTION}" \
-			--env CDB_IS_APPROVED_EXTERNALLY="${MERKELY_IS_APPROVED_EXTERNALLY}"
+			--env CDB_IS_APPROVED_EXTERNALLY="${MERKELY_IS_APPROVED_EXTERNALLY}" \
 			--rm \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			--volume /var/run/docker.sock:/var/run/docker.sock \
