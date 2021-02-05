@@ -108,7 +108,7 @@ merkely_log_test:
 
 
 merkely_log_coverage:
-	echo docker run  \
+	docker run  \
 		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
 		--env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
 		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
