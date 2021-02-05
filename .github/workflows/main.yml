@@ -54,7 +54,7 @@ jobs:
           MERKELY_TEST_TYPE: security
           MERKELY_TEST_RESULTS: build/security/security.xml
         run: |
-          make security || true
+          make security
           make merkely_log_test
 
       - name: Run coverage
