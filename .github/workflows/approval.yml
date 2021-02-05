@@ -25,7 +25,7 @@ jobs:
         MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
         MERKELY_TARGET_SOURCE_COMMITISH: ${{ github.event.inputs.deploy_commit }}
         MERKELY_BASE_SOURCE_COMMITISH: origin/production
-        MERKELY_IS_APPROVED_EXTERNALLY: TRUE
+        MERKELY_IS_APPROVED_EXTERNALLY: "TRUE"
       run: |
         make docker_pull
         make merkely_create_approval
