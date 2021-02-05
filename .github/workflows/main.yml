@@ -65,6 +65,7 @@ jobs:
         run: |
           make coverage
           source build/coverage/coverage_summary.sh
+          export COVERAGE_SUMMARY=$COVERAGE_SUMMARY
           make merkely_log_coverage
 
       - name: Deploy to STAGE
