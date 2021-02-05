@@ -145,7 +145,7 @@ merkely_create_approval:
 		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 		--volume /var/run/docker.sock:/var/run/docker.sock \
 		--volume ${PWD}:/src \
-		merkely/change python -m cdb.create_release -p /Merkelypipe.json
+		merkely/change python -m cdb.create_approval -p /Merkelypipe.json
 
 merkely_control_deployment:
 	docker run \
