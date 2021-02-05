@@ -58,6 +58,17 @@ security:
 			--entrypoint ./security-entrypoint.sh \
 			${IMAGE}
 
+coverage:
+	@docker rm --force $@ 2> /dev/null || true
+	@rm -rf build/coverage
+	@mkdir -p build/coverage
+	@docker run \
+			--name $@ \
+			--rm \
+			--volume ${PWD}/build:/code/build \
+			--entrypoint ./coverage-entrypoint.sh \
+			${IMAGE}
+
 merkely_declare_pipeline:
 	docker run --rm \
 			--env MERKELY_COMMAND=declare_pipeline \
@@ -95,6 +106,21 @@ merkely_log_test:
 			--volume ${PWD}/${MERKELY_TEST_RESULTS}:/data/junit/junit.xml \
 			merkely/change python -m cdb.control_junit -p /Merkelypipe.json
 
+
+merkely_log_coverage:
+	echo docker run  \
+		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+		--env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+		--env CDB_EVIDENCE_TYPE=coverage \
+		--env CDB_IS_COMPLIANT=TRUE \
+		--env CDB_DESCRIPTION="${COVERAGE_SUMMARY}" \
+		--rm \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		--volume=/var/run/docker.sock:/var/run/docker.sock \
+		merkely/change python -m cdb.put_evidence -p /Merkelypipe.json
+
+
 merkely_log_deployment:
 	docker run \
         --env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
@@ -122,15 +148,6 @@ merkely_create_approval:
 
 
 # Re-validate targets below this comment
-
-
-
-coverage:
-	@docker run -p ${SERVER_PORT}:${SERVER_PORT} --name ${CONTAINER} --entrypoint ./coverage-entrypoint.sh ${IMAGE}
-	@rm -rf build/coverage
-	@mkdir -p build/coverage
-	@docker cp ${CONTAINER}:/code/build/coverage/ $(PWD)/build
-	@docker container rm ${CONTAINER}
 
 run: build
 	@docker run --rm  --name ${CONTAINER} ${IMAGE}
