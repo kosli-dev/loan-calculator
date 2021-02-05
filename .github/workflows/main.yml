@@ -45,7 +45,7 @@ jobs:
           MERKELY_TEST_RESULTS: build/test/pytest_unit.xml
         run: |
           make test
-          #make merkely_log_test
+          make merkely_log_test
 
       - name: Run security analysis
         env:
