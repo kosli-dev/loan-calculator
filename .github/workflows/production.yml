@@ -31,6 +31,7 @@ jobs:
         MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
       run: |
         make docker_pull
+        make merkely_control_deployment
         echo YOUR DEPLOYMENT COMMAND HERE
         export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
         make merkely_log_deployment

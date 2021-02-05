@@ -135,18 +135,26 @@ merkely_log_deployment:
 
 merkely_create_approval:
 	docker run \
-			--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
-			--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-			--env CDB_TARGET_SRC_COMMITISH=${MERKELY_TARGET_SOURCE_COMMITISH} \
-			--env CDB_BASE_SRC_COMMITISH=${MERKELY_BASE_SOURCE_COMMITISH} \
-			--env CDB_RELEASE_DESCRIPTION="${MERKELY_DESCRIPTION}" \
-			--env CDB_IS_APPROVED_EXTERNALLY="${MERKELY_IS_APPROVED_EXTERNALLY}" \
-			--rm \
-			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			--volume /var/run/docker.sock:/var/run/docker.sock \
-			--volume ${PWD}:/src \
-			merkely/change python -m cdb.create_release -p /Merkelypipe.json
+		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+		--env CDB_TARGET_SRC_COMMITISH=${MERKELY_TARGET_SOURCE_COMMITISH} \
+		--env CDB_BASE_SRC_COMMITISH=${MERKELY_BASE_SOURCE_COMMITISH} \
+		--env CDB_RELEASE_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+		--env CDB_IS_APPROVED_EXTERNALLY="${MERKELY_IS_APPROVED_EXTERNALLY}" \
+		--rm \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		--volume /var/run/docker.sock:/var/run/docker.sock \
+		--volume ${PWD}:/src \
+		merkely/change python -m cdb.create_release -p /Merkelypipe.json
 
+merkely_control_deployment:
+	docker run \
+		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+		--rm \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		--volume /var/run/docker.sock:/var/run/docker.sock \
+		merkely/change python -m cdb.control_latest_release -p /Merkelypipe.json
 
 # Re-validate targets below this comment
 
