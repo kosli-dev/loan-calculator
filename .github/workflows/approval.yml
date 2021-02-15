@@ -39,7 +39,7 @@ jobs:
         make docker_pull
         make merkely_create_approval
         echo '------'
-        echo ":${MERKELY_FINGERPRINT}:
+        echo ":${MERKELY_FINGERPRINT}:"
         # make merkely_log_approval   ?
         # DROP MERKELY_IS_APPROVED_EXTERNALLY ?
 
