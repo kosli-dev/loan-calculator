@@ -58,7 +58,7 @@ jobs:
           make merkely_log_artifact
 
 
-      - name: Run test suite and log test results to Merkely
+      - name: Run test suite and log summary to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -73,7 +73,7 @@ jobs:
           make merkely_log_test
 
 
-      - name: Run security analysis and log results summary to Merkely
+      - name: Run security analysis and log summary to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
