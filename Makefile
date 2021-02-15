@@ -69,6 +69,7 @@ coverage:
 			--entrypoint ./coverage-entrypoint.sh \
 			${IMAGE}
 
+
 merkely_declare_pipeline:
 	docker run --rm \
 			--env MERKELY_COMMAND=declare_pipeline \
@@ -76,6 +77,7 @@ merkely_declare_pipeline:
 			--env MERKELY_HOST=https://app.compliancedb.com \
 			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 			merkely/change
+
 
 merkely_log_artifact:
 	docker run \
@@ -93,6 +95,7 @@ merkely_log_artifact:
 			--volume=/var/run/docker.sock:/var/run/docker.sock \
 			merkely/change
 
+
 merkely_log_test:
 	docker run \
 		--env MERKELY_COMMAND=log_test \
@@ -105,6 +108,48 @@ merkely_log_test:
 		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 		--volume /var/run/docker.sock:/var/run/docker.sock \
 		merkely/change
+
+
+merkely_log_evidence:
+	docker run \
+        --env MERKELY_COMMAND=log_evidence \
+        --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+        --env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
+        --env MERKELY_IS_COMPLIANT=${MERKELY_IS_COMPLIANT} \
+        --env MERKELY_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+        --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+        --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+        --rm \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+        ${IMAGE}
+
+
+merkely_log_deployment:
+	docker run \
+        --env MERKELY_COMMAND=log_deployment \
+        --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+        --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+        --env MERKELY_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+        --env MERKELY_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
+        --env MERKELY_USER_DATA=${MERKELY_USER_DATA} \
+        --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+        --rm \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+        ${IMAGE}
+
+OLD_merkely_log_deployment:
+	docker run \
+        --env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
+        --env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
+        --env CDB_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
+        --env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+        --env CDB_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+		--rm \
+        --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        merkely/change python -m cdb.create_deployment -p /Merkelypipe.json
 
 
 merkely_log_coverage:
@@ -120,18 +165,6 @@ merkely_log_coverage:
 		--volume=/var/run/docker.sock:/var/run/docker.sock \
 		merkely/change python -m cdb.put_evidence -p /Merkelypipe.json
 
-
-merkely_log_deployment:
-	docker run \
-        --env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
-        --env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-        --env CDB_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
-        --env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-        --env CDB_DESCRIPTION="${MERKELY_DESCRIPTION}" \
-		--rm \
-        --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-        --volume /var/run/docker.sock:/var/run/docker.sock \
-        merkely/change python -m cdb.create_deployment -p /Merkelypipe.json
 
 merkely_create_approval:
 	docker run \
