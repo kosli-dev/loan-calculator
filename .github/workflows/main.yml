@@ -48,7 +48,7 @@ jobs:
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
-          MERKELY_MERKELY_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          MERKELY_MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_TEST_RESULTS_FILE: build/test/pytest_unit.xml
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
