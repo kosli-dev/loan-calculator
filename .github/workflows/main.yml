@@ -99,12 +99,15 @@ jobs:
           make coverage
           # Put coverage summary into MERKELY_DESCRIPTION env-var
           source build/coverage/coverage_summary.sh
+          echo '--------'
+          export ABC="$(build/coverage/echo_coverage_summary.sh)"
+          echo ${ABC}
           export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
           # Log coverage summary to Merkely
           make merkely_log_evidence
 
 
-      - name: Deploy to STAGE
+      - name: Deploy to STAGE and log deployment to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
