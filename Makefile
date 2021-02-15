@@ -80,8 +80,7 @@ merkely_declare_pipeline:
 merkely_log_artifact:
 	docker run \
 			--env MERKELY_COMMAND=log_artifact \
-			--env MERKELY_FINGERPRINT="docker://${IMAGE}" \
-			--env MERKELY_DISPLAY_NAME=${IMAGE} \
+			--env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
 			--env MERKELY_IS_COMPLIANT="TRUE" \
 			--env MERKELY_ARTIFACT_GIT_URL=${MERKELY_ARTIFACT_GIT_URL} \
 			--env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \

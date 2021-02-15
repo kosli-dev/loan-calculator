@@ -21,16 +21,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Get tagged Docker image name
+        id: tagged_image
+        run: |
+          echo ::set-output name=value::merkely/loan-calculator:$(git log -1 --pretty=%h)
+
       - name: Build and Publish Docker Image
         env:
           DOCKER_DEPLOY_TOKEN: ${{ secrets.DOCKER_DEPLOY_TOKEN }}
           DOCKER_DEPLOY_USERNAME: ${{ secrets.DOCKER_DEPLOY_USERNAME }}
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
+          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_ARTIFACT_GIT_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
           MERKELY_ARTIFACT_GIT_COMMIT: ${GITHUB_SHA}
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_CI_BUILD_NUMBER: ${GITHUB_RUN_ID}
-        run: |
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+    run: |
           make build
           make docker_login
           make docker_push
