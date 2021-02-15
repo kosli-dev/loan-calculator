@@ -124,19 +124,6 @@ merkely_log_evidence:
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
         merkely/change
 
-X_merkely_log_coverage:
-	docker run  \
-		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
-		--env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-		--env CDB_EVIDENCE_TYPE=coverage \
-		--env CDB_IS_COMPLIANT=TRUE \
-		--env CDB_DESCRIPTION="${COVERAGE_SUMMARY}" \
-		--rm \
-		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-		--volume=/var/run/docker.sock:/var/run/docker.sock \
-		merkely/change python -m cdb.put_evidence -p /Merkelypipe.json
-
 
 merkely_log_deployment:
 	docker run \

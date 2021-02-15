@@ -60,10 +60,10 @@ jobs:
 
       - name: Run test suite and log test results to Merkely
         env:
-          MERKELY_EVIDENCE_TYPE: unit_test
-          MERKELY_TEST_RESULTS_FILE: build/test/pytest_unit.xml
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_EVIDENCE_TYPE: unit_test
+          MERKELY_TEST_RESULTS_FILE: build/test/pytest_unit.xml
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
@@ -73,12 +73,12 @@ jobs:
           make merkely_log_test
 
 
-      - name: Run security analysis
+      - name: Run security analysis and log results summary to Merkely
         env:
-          MERKELY_EVIDENCE_TYPE: security
-          MERKELY_TEST_RESULTS_FILE: build/security/security.xml
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_EVIDENCE_TYPE: security
+          MERKELY_TEST_RESULTS_FILE: build/security/security.xml
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
@@ -95,13 +95,12 @@ jobs:
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
+          # Write coverage summary to build/coverage/coverage_summary.sh
           make coverage
-          #source build/coverage/coverage_summary.sh
-          #export COVERAGE_SUMMARY=$COVERAGE_SUMMARY
-          #make merkely_log_coverage
-
+          # Put coverage summary into MERKELY_DESCRIPTION env-var
           source build/coverage/coverage_summary.sh
           export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
+          # Log coverage summary to Merkely
           make merkely_log_evidence
 
 
