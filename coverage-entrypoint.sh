@@ -24,5 +24,3 @@ source $OUTDIR/test_cases.sh
 
 echo "{\"test_cases\": $TEST_CASES, \"coverage\": \"$COVERAGE\"}" > $OUTDIR/coverage_summary.json
 echo COVERAGE_SUMMARY="\"$TEST_CASES tests passed with $COVERAGE coverage\"" > $OUTDIR/coverage_summary.sh
-
-echo "echo ${TEST_CASES} tests passed with ${COVERAGE} coverage" > ${OUTDIR}/echo_coverage_summary.sh
