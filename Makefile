@@ -152,7 +152,7 @@ merkely_log_approval:
 		--volume=/var/run/docker.sock:/var/run/docker.sock \
 		--volume ${PWD}:/src \
 		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-		${IMAGE}
+		merkely/change
 
 # - - - - - - - - - - - - - -
 # Still cdb.COMMAND from here
