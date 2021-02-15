@@ -24,11 +24,9 @@ build:
 	@docker build -f Dockerfile -t ${IMAGE} .
 	@docker tag ${IMAGE} ${LATEST}
 
-
 branch:
 	@echo Branch is ${BRANCH_NAME}
 	@echo MERKELYPIPE is ${MERKELYPIPE}
-
 
 docker_login:
 	@echo ${DOCKER_DEPLOY_TOKEN} | docker login --username ${DOCKER_DEPLOY_USERNAME} --password-stdin
@@ -69,31 +67,32 @@ coverage:
 			--entrypoint ./coverage-entrypoint.sh \
 			${IMAGE}
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 merkely_declare_pipeline:
 	docker run --rm \
-			--env MERKELY_COMMAND=declare_pipeline \
-			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
-			--env MERKELY_HOST=https://app.compliancedb.com \
-			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			merkely/change
+		--env MERKELY_COMMAND=declare_pipeline \
+		--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+		--env MERKELY_HOST=https://app.compliancedb.com \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		merkely/change
 
 
 merkely_log_artifact:
 	docker run \
-			--env MERKELY_COMMAND=log_artifact \
-			--env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
-			--env MERKELY_IS_COMPLIANT="TRUE" \
-			--env MERKELY_ARTIFACT_GIT_URL=${MERKELY_ARTIFACT_GIT_URL} \
-			--env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \
-			--env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-			--env MERKELY_CI_BUILD_NUMBER=${MERKELY_CI_BUILD_NUMBER} \
-			--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
-			--env MERKELY_HOST=https://app.compliancedb.com \
-			--rm \
-			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			--volume=/var/run/docker.sock:/var/run/docker.sock \
-			merkely/change
+		--env MERKELY_COMMAND=log_artifact \
+		--env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+		--env MERKELY_IS_COMPLIANT="TRUE" \
+		--env MERKELY_ARTIFACT_GIT_URL=${MERKELY_ARTIFACT_GIT_URL} \
+		--env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \
+		--env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+		--env MERKELY_CI_BUILD_NUMBER=${MERKELY_CI_BUILD_NUMBER} \
+		--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+		--env MERKELY_HOST=https://app.compliancedb.com \
+		--rm \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		--volume=/var/run/docker.sock:/var/run/docker.sock \
+		merkely/change
 
 
 merkely_log_test:
@@ -140,6 +139,24 @@ merkely_log_deployment:
         merkely/change
 
 
+merkely_log_approval:
+	docker run \
+		--env MERKELY_COMMAND=log_approval \
+		--env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+		--env MERKELY_TARGET_SRC_COMMITISH=${MERKELY_TARGET_SRC_COMMITISH} \
+		--env MERKELY_BASE_SRC_COMMITISH=${MERKELY_BASE_SRC_COMMITISH} \
+		--env MERKELY_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+		--env MERKELY_SRC_REPO_ROOT=${MERKELY_SRC_REPO_ROOT} \
+		--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+		--rm \
+		--volume=/var/run/docker.sock:/var/run/docker.sock \
+		--volume ${PWD}:/src \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		${IMAGE}
+
+# - - - - - - - - - - - - - -
+# Still cdb.COMMAND from here
+
 merkely_create_approval:
 	docker run \
 		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
@@ -153,6 +170,7 @@ merkely_create_approval:
 		--volume /var/run/docker.sock:/var/run/docker.sock \
 		--volume ${PWD}:/src \
 		merkely/change python -m cdb.create_approval -p /Merkelypipe.json
+
 
 merkely_control_deployment:
 	docker run \
