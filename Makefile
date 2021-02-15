@@ -95,15 +95,16 @@ merkely_log_artifact:
 
 merkely_log_test:
 	docker run \
-			--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
-			--env CDB_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-			--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-			--env CDB_EVIDENCE_TYPE=${MERKELY_TEST_TYPE} \
-			--rm \
-			--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-			--volume /var/run/docker.sock:/var/run/docker.sock \
-			--volume ${PWD}/${MERKELY_TEST_RESULTS}:/data/junit/junit.xml \
-			merkely/change python -m cdb.control_junit -p /Merkelypipe.json
+		--env MERKELY_COMMAND=log_test \
+		--env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+		--env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
+		--env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+		--env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+		--rm \
+		--volume ${PWD}/${MERKELY_TEST_RESULTS_FILE}:/data/junit/junit.xml \
+		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
+		--volume /var/run/docker.sock:/var/run/docker.sock \
+		merkely/change
 
 
 merkely_log_coverage:
