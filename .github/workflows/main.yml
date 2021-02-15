@@ -24,7 +24,7 @@ jobs:
       - name: Get tagged Docker image name
         id: tagged_image
         run: |
-          echo ::set-output name=value::merkely/loan-calculator:$(git log -1 --pretty=%h)
+          echo ::set-output name=value::merkely/loancalculator:${git log -1 --pretty=%h)
 
       - name: Build and Publish Docker Image
         env:
