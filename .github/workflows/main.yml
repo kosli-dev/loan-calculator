@@ -100,7 +100,7 @@ jobs:
           # Put coverage summary into MERKELY_DESCRIPTION env-var
           source build/coverage/coverage_summary.sh
           echo '--------'
-          export ABC="$(build/coverage/echo_coverage_summary.sh)"
+          export ABC="$(source build/coverage/echo_coverage_summary.sh)"
           echo ${ABC}
           export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
           # Log coverage summary to Merkely
