@@ -122,7 +122,7 @@ merkely_log_evidence:
         --rm \
         --volume=/var/run/docker.sock:/var/run/docker.sock \
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-        ${IMAGE}
+        merkely/change
 
 
 merkely_log_deployment:
@@ -137,7 +137,7 @@ merkely_log_deployment:
         --rm \
         --volume=/var/run/docker.sock:/var/run/docker.sock \
         --volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-        ${IMAGE}
+        merkely/change
 
 OLD_merkely_log_deployment:
 	docker run \
