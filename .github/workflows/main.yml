@@ -58,7 +58,7 @@ jobs:
           make merkely_log_artifact
 
 
-      - name: Run test suite
+      - name: Run test suite and log test results to Merkely
         env:
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_TEST_RESULTS_FILE: build/test/pytest_unit.xml
@@ -67,7 +67,9 @@ jobs:
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
+          # Run the test suite and write results to build/test/pytest_unit.xml
           make test
+          # Log test results to Merkely
           make merkely_log_test
 
 
@@ -84,19 +86,23 @@ jobs:
           make merkely_log_test
 
 
-      - name: Run coverage
+      - name: Run coverage and log summary to Merkely
         env:
-          MERKELY_EVIDENCE_TYPE: coverage
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_EVIDENCE_TYPE: coverage
+          MERKELY_IS_COMPLIANT: 'TRUE'
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           make coverage
+          #source build/coverage/coverage_summary.sh
+          #export COVERAGE_SUMMARY=$COVERAGE_SUMMARY
+          #make merkely_log_coverage
+
           source build/coverage/coverage_summary.sh
-          export COVERAGE_SUMMARY=$COVERAGE_SUMMARY
-          make merkely_log_coverage
-          #make merkely_log_evidence
+          export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
+          make merkely_log_evidence
 
 
       - name: Deploy to STAGE

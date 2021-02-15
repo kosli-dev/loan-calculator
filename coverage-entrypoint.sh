@@ -7,9 +7,9 @@ OUTDIR=build/coverage
 
 #coverage html -d $OUTDIR
 pytest --cov-report html:$OUTDIR/html \
-        --cov-report xml:$OUTDIR/cov.xml \
-        --cov-report term \
-        --cov=src \
+       --cov-report xml:$OUTDIR/cov.xml \
+       --cov-report term \
+       --cov=src \
     | tee $OUTDIR/coverage_output.txt
 
 # Create a file containing the coverage percentage
