@@ -18,6 +18,13 @@ jobs:
         fetch-depth: 0
         ref: ${{ github.event.inputs.deploy_commit }}
 
+
+    - name: Make Docker image name available for following steps
+      id: tagged_image
+      run: |
+        echo ::set-output name=value::merkely/loancalculator:$(git log -1 --pretty=%h)
+
+
     - env:
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
