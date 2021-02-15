@@ -21,15 +21,32 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get tagged Docker image name
+
+      - name: Make Docker image name available for following steps
         id: tagged_image
         run: |
           echo ::set-output name=value::merkely/loancalculator:$(git log -1 --pretty=%h)
+
 
       - name: Build and Publish Docker Image
         env:
           DOCKER_DEPLOY_TOKEN: ${{ secrets.DOCKER_DEPLOY_TOKEN }}
           DOCKER_DEPLOY_USERNAME: ${{ secrets.DOCKER_DEPLOY_USERNAME }}
+        run: |
+          make build
+          make docker_login
+          make docker_push
+
+
+      - name: Declare Merkely Pipeline
+        env:
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+        run: |
+          make merkely_declare_pipeline
+
+
+      - name: Log Docker Image to Merkely
+        env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_ARTIFACT_GIT_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
@@ -38,11 +55,8 @@ jobs:
           MERKELY_CI_BUILD_NUMBER: ${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
-              make build
-              make docker_login
-              make docker_push
-              make merkely_declare_pipeline
-              make merkely_log_artifact
+          make merkely_log_artifact
+
 
       - name: Run test suite
         env:
@@ -56,6 +70,7 @@ jobs:
           make test
           make merkely_log_test
 
+
       - name: Run security analysis
         env:
           MERKELY_EVIDENCE_TYPE: security
@@ -67,6 +82,7 @@ jobs:
         run: |
           make security
           make merkely_log_test
+
 
       - name: Run coverage
         env:
@@ -81,6 +97,7 @@ jobs:
           export COVERAGE_SUMMARY=$COVERAGE_SUMMARY
           make merkely_log_coverage
           #make merkely_log_evidence
+
 
       - name: Deploy to STAGE
         env:
