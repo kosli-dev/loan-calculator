@@ -1,7 +1,7 @@
 {
     "name": "loancalculator",
     "description": "The loan calculator application",
-    "owner": "meekrosoft",
+    "owner": "compliancedb",
     "visibility": "public",
     "template": [
         "artifact",
