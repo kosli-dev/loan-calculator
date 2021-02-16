@@ -1,8 +1,7 @@
 #!/bin/sh
 
-# A docker image entrypoint for gathering coverage data
+# A docker image entrypoint for running tests
 set -e
 rm -rf build/test
 mkdir -p build/test
-pytest -rA --ignore=integration_tests --capture=no --cov=src --junit-xml=build/test/pytest_unit.xml
-coverage html -d build/coverage
+pytest -rA --ignore=integration_tests --capture=no --junit-xml=build/test/pytest_unit.xml

@@ -19,7 +19,7 @@ jobs:
         ref: ${{ github.event.inputs.deploy_commit }}
 
 
-    - name: Make Docker image name available for following steps
+    - name: Make Docker image name available for following step
       id: tagged_image
       run: |
         echo ::set-output name=value::merkely/loancalculator:$(git log -1 --pretty=%h)
