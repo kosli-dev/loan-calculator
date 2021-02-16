@@ -29,7 +29,7 @@ branch:
 	@echo MERKELYPIPE is ${MERKELYPIPE}
 
 docker_login:
-	@echo ${DOCKER_DEPLOY_TOKEN} | docker login --username ${DOCKER_DEPLOY_USERNAME} --password-stdin
+	@echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
 
 docker_push:
 	@docker push ${IMAGE}
@@ -165,20 +165,6 @@ merkely_control_deployment:
 		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 		--volume /var/run/docker.sock:/var/run/docker.sock \
 		merkely/change
-
-# - - - - - - - - - - - - - -
-# Still cdb.COMMAND from here
-
-OLD_merkely_control_deployment:
-	docker run \
-		--env CDB_API_TOKEN=${MERKELY_API_TOKEN} \
-		--env CDB_ARTIFACT_DOCKER_IMAGE=${IMAGE} \
-		--rm \
-		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
-		--volume /var/run/docker.sock:/var/run/docker.sock \
-		merkely/change python -m cdb.control_latest_release -p /Merkelypipe.json
-
-# Re-validate targets below this comment
 
 run: build
 	@docker run --rm  --name ${CONTAINER} ${IMAGE}

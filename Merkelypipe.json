@@ -1,7 +1,7 @@
 {
     "name": "loancalculator",
-    "description": "The loan calculator application",
     "owner": "compliancedb",
+    "description": "The loan calculator application",
     "visibility": "public",
     "template": [
         "artifact",

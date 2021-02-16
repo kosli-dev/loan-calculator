@@ -21,17 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-
       - name: Make Docker image name available for following steps
         id: tagged_image
         run: |
-          echo ::set-output name=value::merkely/loancalculator:$(git log -1 --pretty=%h)
+          echo ::set-output name=value::${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)
 
 
       - name: Build and Publish Docker Image
         env:
-          DOCKER_DEPLOY_TOKEN: ${{ secrets.DOCKER_DEPLOY_TOKEN }}
-          DOCKER_DEPLOY_USERNAME: ${{ secrets.DOCKER_DEPLOY_USERNAME }}
+          DOCKERHUB_DEPLOY_TOKEN: ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }}
+          DOCKERHUB_DEPLOY_USERNAME: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
         run: |
           make build
           make docker_login
