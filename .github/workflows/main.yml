@@ -59,6 +59,8 @@ jobs:
 
 
       - name: Run test suite and log summary to Merkely
+        # Run the test suite, write results to build/test/pytest_unit.xml
+        # Log these results to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -67,13 +69,13 @@ jobs:
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
-          # Run the test suite and write results to build/test/pytest_unit.xml
           make test
-          # Log test results to Merkely
           make merkely_log_test
 
 
       - name: Run security analysis and log summary to Merkely
+        # Run the bandit security, write results to build/security/security.xml
+        # Log these results to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -87,6 +89,8 @@ jobs:
 
 
       - name: Run coverage and log summary to Merkely
+        # Run coverage, write summary to build/coverage/coverage_summary.sh
+        # Put coverage summary to Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -95,12 +99,9 @@ jobs:
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
-          # Write coverage summary to build/coverage/coverage_summary.sh
           make coverage
-          # Put coverage summary into MERKELY_DESCRIPTION env-var
           source build/coverage/coverage_summary.sh
           export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
-          # Log coverage summary to Merkely
           make merkely_log_evidence
 
 
