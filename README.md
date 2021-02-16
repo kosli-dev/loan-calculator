@@ -6,7 +6,7 @@ This repository provides a demo project for getting started with the [Merkely De
 
 First off, fork or clone this repo so you can follow along.
 
-Secondly, change the owner in [the Merkleypipe pipeline definition](blob/master/Merkelypipe.json#L4) to your user/team in Merkely.
+Secondly, change the owner in [the Merkleypipe pipeline definition](Merkelypipe.json#L4) to your user/team in Merkely.
 
 Thirdly, you will need to add three secrets in the github repository settings.
 
