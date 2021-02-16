@@ -1,0 +1,7 @@
+*
+!src/
+!test/
+!requirements.txt
+!test-entrypoint.sh
+!coverage-entrypoint.sh
+!security-entrypoint.sh
