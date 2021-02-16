@@ -1,10 +1,6 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Master Pipeline
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
@@ -13,7 +9,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,6 +22,13 @@ jobs:
           echo ::set-output name=value::${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)
 
 
+      - name: Declare Merkely Pipeline
+        env:
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+        run: |
+          make merkely_declare_pipeline
+
+
       - name: Build and Publish Docker Image
         env:
           DOCKERHUB_DEPLOY_TOKEN: ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }}
@@ -37,14 +39,7 @@ jobs:
           make docker_push
 
 
-      - name: Declare Merkely Pipeline
-        env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-        run: |
-          make merkely_declare_pipeline
-
-
-      - name: Log Docker Image to Merkely
+      - name: Log Docker Image in Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -57,13 +52,13 @@ jobs:
           make merkely_log_artifact
 
 
-      - name: Run test suite and log summary to Merkely
+      - name: Run test suite and log summary in Merkely
         # Run the test suite, write results to build/test/pytest_unit.xml
-        # Log these results to Merkely
+        # Log these results in Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
+          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -72,13 +67,13 @@ jobs:
           make merkely_log_test
 
 
-      - name: Run security analysis and log summary to Merkely
+      - name: Run security analysis and log summary in Merkely
         # Run the bandit security, write results to build/security/security.xml
-        # Log these results to Merkely
+        # Log these results in Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           TEST_RESULTS_FILE: build/security/security.xml
+          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_EVIDENCE_TYPE: security
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -87,9 +82,9 @@ jobs:
           make merkely_log_test
 
 
-      - name: Run coverage and log summary to Merkely
+      - name: Run coverage and log summary in Merkely
         # Run coverage, write summary to build/coverage/coverage_summary.sh
-        # Put coverage summary to Merkely
+        # Put coverage summary in Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
@@ -104,7 +99,7 @@ jobs:
           make merkely_log_evidence
 
 
-      - name: Deploy to STAGE and log deployment to Merkely
+      - name: Deploy to STAGE and log deployment in Merkely
         env:
           TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}

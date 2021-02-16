@@ -8,7 +8,7 @@ on:
         default: 'master'
 
 jobs:
-  production-deploy:
+  production_deploy:
 
     # This is a manually triggered workflow to deploy to production
     # Runs from production branch
