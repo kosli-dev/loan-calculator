@@ -28,20 +28,9 @@ jobs:
     - env:
         TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
         MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
-
         MERKELY_TARGET_SOURCE_COMMITISH: ${{ github.event.inputs.deploy_commit }}
-        # merkely/change uses this... preference
-        # MERKELY_TARGET_SRC_COMMITISH: ${GITHUB_SHA}
-
         MERKELY_BASE_SOURCE_COMMITISH: origin/production
-        # merkely/change uses this...
-        # MERKELY_BASE_SRC_COMMITISH: "origin/latest"
-
         MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
-        # merkely/change uses this... preference
-        # MERKELY_DESCRIPTION: "Approval created in github actions on git tag ${GITHUB_REF}"
-
-        # MERKELY_IS_APPROVED_EXTERNALLY: "TRUE"
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
       run: |
         make docker_pull
