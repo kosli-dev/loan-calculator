@@ -31,11 +31,11 @@ jobs:
         MERKELY_TARGET_SOURCE_COMMITISH: ${{ github.event.inputs.deploy_commit }}
         MERKELY_BASE_SOURCE_COMMITISH: origin/production
         MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
+        MERKELY_IS_APPROVED: 'TRUE'
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
       run: |
         make docker_pull
-        make merkely_create_approval
-        # make merkely_log_approval
+        make merkely_log_approval
 
 
 
