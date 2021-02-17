@@ -19,7 +19,7 @@ jobs:
       - name: Make Docker image name available for following steps
         id: tagged_image
         run: |
-          echo ::set-output name=value::${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)
+          echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
       - name: Declare Merkely Pipeline
@@ -41,7 +41,6 @@ jobs:
 
       - name: Log Docker Image in Merkely
         env:
-          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_ARTIFACT_GIT_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
           MERKELY_ARTIFACT_GIT_COMMIT: ${GITHUB_SHA}
@@ -56,7 +55,6 @@ jobs:
         # Run the test suite, write results to build/test/pytest_unit.xml
         # Log these results in Merkely
         env:
-          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_EVIDENCE_TYPE: unit_test
@@ -71,7 +69,6 @@ jobs:
         # Run the bandit security, write results to build/security/security.xml
         # Log these results in Merkely
         env:
-          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           TEST_RESULTS_FILE: build/security/security.xml
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_EVIDENCE_TYPE: security
@@ -86,7 +83,6 @@ jobs:
         # Run coverage, write summary to build/coverage/coverage_summary.sh
         # Put coverage summary in Merkely
         env:
-          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_EVIDENCE_TYPE: coverage
           MERKELY_IS_COMPLIANT: 'TRUE'
@@ -101,7 +97,6 @@ jobs:
 
       - name: Deploy to STAGE and log deployment in Merkely
         env:
-          TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
           MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
           MERKELY_ENVIRONMENT: staging
           MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
