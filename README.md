@@ -46,5 +46,11 @@ In addition, we have these manually triggered ci pipeline:
 
 1. Go to the github actions and run the master pipeline.  See the results in Merkely.
 
+2. Check deployments are blocked without approval.
+   * Run the `Deploy to Production` workflow.  It should fail because the artifact is not approved for deployment.
+   * Run the `Create approval in Merkely` workflow.  It will create an approval in Merkely.
+   * You can see this in the `Approvals` tab in your pipeline.  Go ahead an approve it in Merkely's UI.
+   * Re-run the `Deploy to Production` workflow. This time it should succeed.
 
+3. Extra-credit: Smuggling in security failures
 
