@@ -8,35 +8,22 @@ SERVER_PORT := 8002
 MERKELYPIPE=Merkelypipe.json
 
 
-# all non-latest images - for prune target
-IMAGES := $(shell docker image ls --format '{{.Repository}}:{{.Tag}}' | grep $(REPOSITORY) | grep -v latest)
 
-# list the targets: from https://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile
+# list the targets
 .PHONY: list build coverage test
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-ensure_network:
-	docker network inspect cdb_net &>/dev/null || docker network create --driver bridge cdb_net
 
 build:
 	@echo ${IMAGE}
 	@docker build -f Dockerfile -t ${IMAGE} .
 	@docker tag ${IMAGE} ${LATEST}
 
-branch:
-	@echo Branch is ${BRANCH_NAME}
-	@echo MERKELYPIPE is ${MERKELYPIPE}
 
-docker_login:
-	@echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
+run: build
+	@docker run --rm  --name ${CONTAINER} ${IMAGE}
 
-docker_push:
-	@docker push ${IMAGE}
-	@docker push ${LATEST}
-
-docker_pull:
-	@docker pull ${IMAGE}
 
 test:
 	@docker run --name ${CONTAINER} --entrypoint ./test-entrypoint.sh ${IMAGE}
@@ -44,6 +31,7 @@ test:
 	@mkdir -p build/test
 	@docker cp ${CONTAINER}:/code/build/test/ $(PWD)/build
 	@docker container rm ${CONTAINER}
+
 
 security:
 	@docker rm --force $@ 2> /dev/null || true
@@ -56,6 +44,7 @@ security:
 			--entrypoint ./security-entrypoint.sh \
 			${IMAGE}
 
+
 coverage:
 	@docker rm --force $@ 2> /dev/null || true
 	@rm -rf build/coverage
@@ -66,6 +55,24 @@ coverage:
 			--volume ${PWD}/build:/code/build \
 			--entrypoint ./coverage-entrypoint.sh \
 			${IMAGE}
+
+
+branch:
+	@echo Branch is ${BRANCH_NAME}
+	@echo MERKELYPIPE is ${MERKELYPIPE}
+
+
+docker_login:
+	@echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
+
+
+docker_push:
+	@docker push ${IMAGE}
+	@docker push ${LATEST}
+
+
+docker_pull:
+	@docker pull ${IMAGE}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -165,9 +172,6 @@ merkely_control_deployment:
 		--volume ${PWD}/${MERKELYPIPE}:/Merkelypipe.json \
 		--volume /var/run/docker.sock:/var/run/docker.sock \
 		merkely/change
-
-run: build
-	@docker run --rm  --name ${CONTAINER} ${IMAGE}
 
 
 
