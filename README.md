@@ -1,6 +1,6 @@
 # Loan Calculator Demo
 
-This repository provides a demo project for getting started with the [Merkely DevOps Change Management Platform].
+This repository provides a demo project for getting started with the [Merkely DevOps Change Management Platform](https://app.compliancedb.com).
 
 # Getting started
 
