@@ -1,8 +1,8 @@
 {
-    "name": "loancalculator",
-    "owner": "compliancedb",
-    "description": "The loan calculator application",
-    "visibility": "private",
+    "name": "JonsLoanCalculator",
+    "owner": "JonJagger",
+    "description": "Jons loan calculator application",
+    "visibility": "public",
     "template": [
         "artifact",
         "unit_test",
