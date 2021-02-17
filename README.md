@@ -12,15 +12,17 @@ Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 platform.
 4. Add the secrets below in your github repository settings.
 
-| *SECRET NAME* | *NOTES* |
+| SECRET NAME | NOTES |
+| ----------- | ----- |
 | `MERKELY_API_TOKEN` | Your Merkely api token is in [your profile page](https://app.compliancedb.com/settings/profile). |
 | `DOCKERHUB_DEPLOY_USERNAME` | Your dockerhub username |
 | `DOCKERHUB_REPO_OWNER` | Your repository owner in dockerhub, typically the same as `DOCKERHUB_DEPLOY_USERNAME` |
 | `DOCKERHUB_DEPLOY_TOKEN` | For deploying your docker image, you will need to make a [personal access token](https://docs.docker.com/docker-hub/access-tokens/) |
 
 
-![secrets](images/secrets.png)
+For example:
 
+![secrets](images/secrets.png)
 
 
 # The pipelines
