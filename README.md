@@ -9,7 +9,6 @@ Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 1. Fork this repo so you can follow along.
 2. Change the `owner` in [the Merkleypipe pipeline definition](Merkelypipe.json#L3) to the name of your user or team in the Merkely platform.
 3. Also, change the values for `description` and `name` in [Merkelypipe.json](Merkelypipe.json). Name should not contain whitespace.
-platform.
 4. Add the secrets below in your github repository settings.
 
 | SECRET NAME | NOTES |
