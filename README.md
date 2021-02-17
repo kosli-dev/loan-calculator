@@ -7,11 +7,17 @@ This repository provides a demo project for getting started with the [Merkely De
 Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
 1. Fork this repo so you can follow along.
-2. Change the `owner` [the Merkleypipe pipeline definition](Merkelypipe.json#L3) to the name of your user or team in the Merkely platform.
-3. Change the values for `description` and `name` in the [Merkelypipe.json](Merkelypipe.json).
+2. Change the `owner` in [the Merkleypipe pipeline definition](Merkelypipe.json#L3) to the name of your user or team in the Merkely platform.
+3. Also, change the values for `description` and `name` in [Merkelypipe.json](Merkelypipe.json). Name should not contain whitespace.
+platform.
 4. Add the secrets below in your github repository settings.
-    * Your Merkely api token is in [your profile page](https://app.compliancedb.com/settings/profile).
-    * For deploying your docker image, you will need to make a [personal access token](https://docs.docker.com/docker-hub/access-tokens/)
+
+| *SECRET NAME* | *NOTES* |
+| `MERKELY_API_TOKEN` | Your Merkely api token is in [your profile page](https://app.compliancedb.com/settings/profile). |
+| `DOCKERHUB_DEPLOY_USERNAME` | Your dockerhub username |
+| `DOCKERHUB_REPO_OWNER` | Your repository owner in dockerhub, typically the same as `DOCKERHUB_DEPLOY_USERNAME` |
+| `DOCKERHUB_DEPLOY_TOKEN` | For deploying your docker image, you will need to make a [personal access token](https://docs.docker.com/docker-hub/access-tokens/) |
+
 
 ![secrets](images/secrets.png)
 
@@ -35,7 +41,9 @@ In addition, we have these manually triggered ci pipeline:
 * [Deploy to Production](blob/master/.github/workflows/deploy_to_production.yml)
 
 
+# Things to try
 
+1. Go to the github actions and run the master pipeline.  See the results in Merkely.
 
 
 

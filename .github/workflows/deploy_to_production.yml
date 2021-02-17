@@ -26,6 +26,7 @@ jobs:
     - name: Make Docker image name available for following steps
       run: |
         echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+        echo "UNTAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
 
 
     - env:

@@ -2,11 +2,20 @@ APP    := loancalculator
 CONTAINER := merkely_loancalculator_1
 REPOSITORY   := merkely/${APP}
 TAG    := $$(git log -1 --pretty=%h)
-IMAGE  := ${REPOSITORY}:${TAG}
-LATEST := ${REPOSITORY}:latest
 SERVER_PORT := 8002
 MERKELYPIPE=Merkelypipe.json
 
+ifdef TAGGED_IMAGE
+IMAGE := ${TAGGED_IMAGE}
+else
+IMAGE  := ${REPOSITORY}:${TAG}
+endif
+
+ifdef UNTAGGED_IMAGE
+LATEST := ${UNTAGGED_IMAGE}:latest
+else
+LATEST := ${REPOSITORY}:latest
+endif
 
 
 # list the targets
