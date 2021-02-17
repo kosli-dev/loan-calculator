@@ -20,7 +20,6 @@ jobs:
 
 
     - name: Make Docker image name available for following step
-      id: tagged_image
       run: |
         echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
