@@ -1,7 +1,7 @@
 {
-    "name": "loancalculator",
+    "name": "JonsLoanCalculator",
     "owner": "JonJagger",
-    "description": "The loan calculator application",
+    "description": "Jons loan calculator application",
     "visibility": "public",
     "template": [
         "artifact",
