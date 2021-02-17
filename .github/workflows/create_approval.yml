@@ -22,11 +22,10 @@ jobs:
     - name: Make Docker image name available for following step
       id: tagged_image
       run: |
-        echo ::set-output name=value::merkely/loancalculator:$(git log -1 --pretty=%h)
+        echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
     - env:
-        TAGGED_IMAGE: ${{ steps.tagged_image.outputs.value }}
         MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
         MERKELY_TARGET_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
         MERKELY_BASE_SRC_COMMITISH: origin/production
