@@ -54,3 +54,8 @@ In addition, we have these manually triggered ci pipeline:
 
 3. Extra-credit: Smuggling in security failures
 
+
+# Useful links
+
+[Merkely Login Page](https://app.compliancedb.com/)
+[Merkely Documentation](https://docs.merkely.com/)
