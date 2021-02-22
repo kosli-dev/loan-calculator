@@ -2,6 +2,6 @@
 !src/
 !test/
 !requirements.txt
-!test-entrypoint.sh
-!coverage-entrypoint.sh
-!security-entrypoint.sh
+!entrypoint-test.sh
+!entrypoint-coverage.sh
+!entrypoint-security.sh

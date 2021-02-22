@@ -35,34 +35,37 @@ run: build
 
 
 test:
-	@docker run --name ${CONTAINER} --entrypoint ./test-entrypoint.sh ${IMAGE}
+	@docker container rm --force $@ 2> /dev/null || true
+	@docker run \
+		--name $@ \
+		--entrypoint ./entrypoint-test.sh \
+		${IMAGE}
 	@rm -rf build/test
 	@mkdir -p build/test
-	@docker cp ${CONTAINER}:/code/build/test/ $(PWD)/build
-	@docker container rm ${CONTAINER}
+	@docker cp $@:/code/build/test/ $(PWD)/build
 
 
 security:
-	@docker rm --force $@ 2> /dev/null || true
+	@docker container rm --force $@ 2> /dev/null || true
 	@rm -rf build/security
 	@mkdir -p build/security
 	@docker run \
 			--name $@ \
 			--rm \
 			--volume ${PWD}/build:/code/build \
-			--entrypoint ./security-entrypoint.sh \
+			--entrypoint ./entrypoint-security.sh \
 			${IMAGE}
 
 
 coverage:
-	@docker rm --force $@ 2> /dev/null || true
+	@docker container rm --force $@ 2> /dev/null || true
 	@rm -rf build/coverage
 	@mkdir -p build/coverage
 	@docker run \
 			--name $@ \
 			--rm \
 			--volume ${PWD}/build:/code/build \
-			--entrypoint ./coverage-entrypoint.sh \
+			--entrypoint ./entrypoint-coverage.sh \
 			${IMAGE}
 
 
