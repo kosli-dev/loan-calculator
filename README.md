@@ -57,5 +57,5 @@ In addition, we have these manually triggered ci pipeline:
 
 # Useful links
 
-[Merkely Login Page](https://app.compliancedb.com/)
-[Merkely Documentation](https://docs.merkely.com/)
+* [Merkely Login Page](https://app.compliancedb.com/)
+* [Merkely Documentation](https://docs.merkely.com/)
