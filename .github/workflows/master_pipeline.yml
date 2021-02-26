@@ -33,11 +33,11 @@ jobs:
 
       - name: Build and Publish Docker Image
         env:
-          DOCKERHUB_DEPLOY_TOKEN: ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }}
-          DOCKERHUB_DEPLOY_USERNAME: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
+          X_DOCKERHUB_DEPLOY_TOKEN: ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }}
+          X_DOCKERHUB_DEPLOY_USERNAME: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
         run: |
           make build
-          make docker_login
+	      @echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
           make docker_push
 
 
