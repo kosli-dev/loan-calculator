@@ -71,7 +71,7 @@ jobs:
         # Log these results in Merkely
         env:
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -95,7 +95,7 @@ jobs:
         # Log these results in Merkely
         env:
           TEST_RESULTS_FILE: build/security/security.xml
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: security
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -118,7 +118,7 @@ jobs:
         # Run coverage, write summary to build/coverage/coverage_summary.sh
         # Put coverage summary in Merkely
         env:
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: coverage
           MERKELY_IS_COMPLIANT: 'TRUE'
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
@@ -143,7 +143,7 @@ jobs:
 
       - name: Deploy to STAGE and log deployment in Merkely
         env:
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_ENVIRONMENT: staging
           MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
