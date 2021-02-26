@@ -43,7 +43,7 @@ jobs:
 
       - name: Log Docker Image in Merkely
         env:
-          MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_ARTIFACT_GIT_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
           MERKELY_ARTIFACT_GIT_COMMIT: ${GITHUB_SHA}
           MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
