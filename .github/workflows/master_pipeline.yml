@@ -16,13 +16,12 @@ jobs:
 
       - name: Make Docker image name available for following steps
         run: |
+          echo "LATEST_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
           echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
           echo "UNTAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
 
 
       - name: Declare Merkely Pipeline
-        env:
-          X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           docker run --rm \
               --env MERKELY_COMMAND=declare_pipeline \
@@ -32,13 +31,16 @@ jobs:
 
 
       - name: Build and Publish Docker Image
-        env:
-          X_DOCKERHUB_DEPLOY_TOKEN: ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }}
-          X_DOCKERHUB_DEPLOY_USERNAME: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
         run: |
-          make build
+          #make build
+          docker build --file ${PWD}/Dockerfile --tag ${{ env.TAGGED_IMAGE }}
+          docker tag ${{ env.TAGGED_IMAGE }} ${{ env.LATEST_IMAGE}}
+
           echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
-          make docker_push
+
+          #make docker_push
+          docker push ${{ env.TAGGED_IMAGE }}
+          docker push ${{ env.LATEST_IMAGE}}
 
 
       - name: Log Docker Image in Merkely

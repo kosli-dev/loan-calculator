@@ -31,7 +31,7 @@ build:
 
 
 run: build
-	@docker run --rm  --name ${CONTAINER} ${IMAGE}
+	@docker run --rm --name ${CONTAINER} ${IMAGE}
 
 
 test:
