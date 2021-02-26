@@ -95,18 +95,20 @@ jobs:
         # Log these results in Merkely
         env:
           TEST_RESULTS_FILE: build/security/security.xml
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
-          MERKELY_EVIDENCE_TYPE: security
-          MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          X_MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          X_MERKELY_EVIDENCE_TYPE: security
+          X_MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           make security
           docker run \
               --env MERKELY_COMMAND=log_test \
-              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
-              --env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
-              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
+              --env MERKELY_EVIDENCE_TYPE=security \
+              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
+              --env GITHUB_SERVER_URL \
+              --env GITHUB_REPOSITORY \
+              --env GITHUB_RUN_ID \
               --rm \
               --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
