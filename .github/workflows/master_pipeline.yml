@@ -37,7 +37,7 @@ jobs:
           X_DOCKERHUB_DEPLOY_USERNAME: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
         run: |
           make build
-	      @echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
+	      echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
           make docker_push
 
 
