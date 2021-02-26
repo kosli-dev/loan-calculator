@@ -22,19 +22,34 @@ jobs:
     - name: Make Docker image name available for following step
       run: |
         echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
-        echo "UNTAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
 
 
     - env:
-        MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
-        MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
-        MERKELY_OLDEST_SRC_COMMITISH: origin/production
-        MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
-        MERKELY_IS_APPROVED: 'TRUE'
-        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+        X_MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
+        X_MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
+        X_MERKELY_OLDEST_SRC_COMMITISH: origin/production
+        X_MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
+        X_MERKELY_IS_APPROVED: 'TRUE'
+        X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
       run: |
-        make docker_pull
-        make merkely_log_approval
+        # make docker_pull
+        docker pull ${{ env.TAGGED_IMAGE }}
+
+        # make merkely_log_approval
+        docker run \
+            --env MERKELY_COMMAND=log_approval \
+            --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
+            --env MERKELY_NEWEST_SRC_COMMITISH=${{ github.event.inputs.deploy_commit }} \
+            --env MERKELY_OLDEST_SRC_COMMITISH=origin/production \
+            --env MERKELY_DESCRIPTION="Approval created by ${GITHUB_ACTOR} on github" \
+            --env MERKELY_IS_APPROVED=TRUE \
+            --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
+            --rm \
+            --volume=/var/run/docker.sock:/var/run/docker.sock \
+            --volume ${PWD}:/src \
+            --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+            merkely/change
+
 
 
 
