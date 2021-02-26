@@ -1,4 +1,4 @@
-name: Create approval in Merkely
+name: Request approval in Merkely
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +8,7 @@ on:
         default: 'master'
 
 jobs:
-  create_approval_in_merkely:
+  request_approval_in_merkely:
 
     runs-on: ubuntu-latest
     steps:
