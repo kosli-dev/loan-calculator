@@ -50,7 +50,20 @@ jobs:
           MERKELY_CI_BUILD_NUMBER: ${GITHUB_RUN_ID}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
-          make merkely_log_artifact
+          docker run \
+              --env MERKELY_COMMAND=log_artifact \
+              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+              --env MERKELY_IS_COMPLIANT="TRUE" \
+              --env MERKELY_ARTIFACT_GIT_URL=${MERKELY_ARTIFACT_GIT_URL} \
+              --env MERKELY_ARTIFACT_GIT_COMMIT=${MERKELY_ARTIFACT_GIT_COMMIT} \
+              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+              --env MERKELY_CI_BUILD_NUMBER=${MERKELY_CI_BUILD_NUMBER} \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --rm \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              merkely/change
+
 
 
       - name: Run test suite and log summary in Merkely
@@ -64,7 +77,17 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           make test
-          make merkely_log_test
+          docker run \
+              --env MERKELY_COMMAND=log_test \
+              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+              --env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
+              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --rm \
+              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+              --volume /var/run/docker.sock:/var/run/docker.sock \
+              merkely/change
 
 
       - name: Run security analysis and log summary in Merkely
@@ -78,7 +101,17 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           make security
-          make merkely_log_test
+          docker run \
+              --env MERKELY_COMMAND=log_test \
+              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+              --env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
+              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --rm \
+              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+              --volume /var/run/docker.sock:/var/run/docker.sock \
+              merkely/change
 
 
       - name: Run coverage and log summary in Merkely
@@ -94,7 +127,18 @@ jobs:
           make coverage
           source build/coverage/coverage_summary.sh
           export MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
-          make merkely_log_evidence
+          docker run \
+              --env MERKELY_COMMAND=log_evidence \
+              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+              --env MERKELY_EVIDENCE_TYPE=${MERKELY_EVIDENCE_TYPE} \
+              --env MERKELY_IS_COMPLIANT=${MERKELY_IS_COMPLIANT} \
+              --env MERKELY_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --rm \
+              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+              merkely/change
 
 
       - name: Deploy to STAGE and log deployment in Merkely
@@ -106,4 +150,15 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           echo YOUR DEPLOYMENT COMMAND HERE
-          make merkely_log_deployment
+          docker run \
+              --env MERKELY_COMMAND=log_deployment \
+              --env MERKELY_FINGERPRINT=${MERKELY_FINGERPRINT} \
+              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
+              --env MERKELY_DESCRIPTION="${MERKELY_DESCRIPTION}" \
+              --env MERKELY_ENVIRONMENT=${MERKELY_ENVIRONMENT} \
+              --env MERKELY_USER_DATA=${MERKELY_USER_DATA} \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --rm \
+              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+              merkely/change
