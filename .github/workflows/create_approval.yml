@@ -24,18 +24,10 @@ jobs:
         echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
-    - env:
-        X_MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
-        X_MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
-        X_MERKELY_OLDEST_SRC_COMMITISH: origin/production
-        X_MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
-        X_MERKELY_IS_APPROVED: 'TRUE'
-        X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+    - name: Request Approval in Merkely
       run: |
-        # make docker_pull
         docker pull ${{ env.TAGGED_IMAGE }}
 
-        # make merkely_log_approval
         docker run \
             --env MERKELY_COMMAND=log_approval \
             --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
