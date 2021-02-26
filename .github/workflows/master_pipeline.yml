@@ -42,13 +42,6 @@ jobs:
 
 
       - name: Log Docker Image in Merkely
-        env:
-          X_MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
-          X_MERKELY_ARTIFACT_GIT_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
-          X_MERKELY_ARTIFACT_GIT_COMMIT: ${GITHUB_SHA}
-          X_MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-          X_MERKELY_CI_BUILD_NUMBER: ${GITHUB_RUN_ID}
-          X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
           docker run \
               --env MERKELY_COMMAND=log_artifact \
@@ -65,21 +58,18 @@ jobs:
               merkely/change
 
 
-      - name: Run test suite and log summary in Merkely
-        # Run the test suite, write results to build/test/pytest_unit.xml
-        # Log these results in Merkely
+      - name: Run unit tests and log results in Merkely
         env:
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
-          X_MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
-          X_MERKELY_EVIDENCE_TYPE: unit_test
-          X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
+          # Run the test suite, write results to build/test/pytest_unit.xml
           make test
+
+          # Log unit-test results in Merkely
           docker run \
               --env MERKELY_COMMAND=log_test \
               --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
               --env MERKELY_EVIDENCE_TYPE=unit_test \
-              --env MERKELY_CI_BUILD_URL=${MERKELY_CI_BUILD_URL} \
               --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
               --env GITHUB_SERVER_URL \
               --env GITHUB_REPOSITORY \
@@ -137,12 +127,12 @@ jobs:
               merkely/change
 
 
-      - name: Deploy to STAGE and log deployment in Merkely
+      - name: Deploy to staging and log deployment in Merkely
         run: |
-          # Deploy
+          # Deploy to staging
           echo YOUR DEPLOYMENT COMMAND HERE
 
-          # Log deployment in Merkely
+          # Log deployment to staging in Merkely
           docker run \
               --env MERKELY_COMMAND=log_deployment \
               --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
