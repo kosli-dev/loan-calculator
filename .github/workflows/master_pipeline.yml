@@ -32,13 +32,11 @@ jobs:
 
       - name: Build and Publish Docker Image
         run: |
-          #make build
           docker build --file ${PWD}/Dockerfile --tag ${{ env.TAGGED_IMAGE }} ${PWD}
           docker tag ${{ env.TAGGED_IMAGE }} ${{ env.LATEST_IMAGE }}
 
           echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
 
-          #make docker_push
           docker push ${{ env.TAGGED_IMAGE }}
           docker push ${{ env.LATEST_IMAGE }}
 
@@ -64,10 +62,17 @@ jobs:
         env:
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
         run: |
-          # Run the test suite, write results to build/test/pytest_unit.xml
-          make test
+          # Run the units tests, write results to build/test/pytest_unit.xml
+          #make test
+          docker run \
+              --name container \
+              --entrypoint ./entrypoint-unit_test.sh \
+              ${{ env.TAGGED_IMAGE }}
+          mkdir -p build/test
+          docker cp container:/code/build/test/ ${PWD}/build
+          docker remove container
 
-          # Log unit-test results in Merkely
+          # Log test results in Merkely
           docker run \
               --env MERKELY_COMMAND=log_test \
               --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
