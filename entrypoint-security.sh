@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# A docker image entrypoint for gathering coverage data
+# A docker image entrypoint for gathering security data
 set -e
 rm -rf build/security
 mkdir -p build/security

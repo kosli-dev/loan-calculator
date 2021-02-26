@@ -63,14 +63,13 @@ jobs:
           TEST_RESULTS_FILE: build/test/pytest_unit.xml
         run: |
           # Run the units tests, write results to build/test/pytest_unit.xml
-          #make test
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
               ${{ env.TAGGED_IMAGE }}
           mkdir -p build/test
           docker cp container:/code/build/test/ ${PWD}/build
-          docker remove container
+          docker rm container
 
           # Log test results in Merkely
           docker run \
@@ -90,10 +89,15 @@ jobs:
 
       - name: Run security analysis and log summary in Merkely
         env:
-          TEST_RESULTS_FILE: build/security/security.xml
+          SECURITY_RESULTS_FILE: build/security/security.xml
         run: |
-          # Run the bandit security, write results to build/security/security.xml
-          make security
+          # Run the bandit security, write results directly to build/security/security.xml
+          mkdir -p build/security
+          docker run \
+                  --rm \
+                  --volume ${PWD}/build:/code/build \
+                  --entrypoint ./entrypoint-security.sh \
+                  ${{ env.TAGGED_IMAGE }}
 
           # Log security results in Merkely
           docker run \
@@ -105,7 +109,7 @@ jobs:
               --env GITHUB_REPOSITORY \
               --env GITHUB_RUN_ID \
               --rm \
-              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
+              --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
               --volume /var/run/docker.sock:/var/run/docker.sock \
               merkely/change
@@ -114,7 +118,12 @@ jobs:
       - name: Run coverage and log summary in Merkely
         run: |
           # Run coverage, write summary to build/coverage/coverage_summary.sh
-          make coverage
+          mkdir -p build/coverage
+          docker run \
+                  --rm \
+                  --volume ${PWD}/build:/code/build \
+                  --entrypoint ./entrypoint-coverage.sh \
+                  ${{ env.TAGGED_IMAGE }}
           source build/coverage/coverage_summary.sh
 
           # Log coverage summary in Merkely
