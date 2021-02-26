@@ -5,8 +5,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -26,7 +24,11 @@ jobs:
         env:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
         run: |
-          make merkely_declare_pipeline
+          docker run --rm \
+              --env MERKELY_COMMAND=declare_pipeline \
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
+              --volume ${PWD}/${MERKELYPIPE}:/data/Merkelypipe.json \
+              merkely/change
 
 
       - name: Build and Publish Docker Image
