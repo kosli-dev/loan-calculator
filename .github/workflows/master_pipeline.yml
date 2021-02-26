@@ -86,7 +86,7 @@ jobs:
               merkely/change
 
 
-      - name: Run security analysis and log summary in Merkely
+      - name: Run security analysis and log results in Merkely
         env:
           SECURITY_RESULTS_FILE: build/security/security.xml
         run: |
@@ -114,7 +114,7 @@ jobs:
               merkely/change
 
 
-      - name: Run coverage and log summary in Merkely
+      - name: Run coverage and log results in Merkely
         run: |
           # Run coverage, write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage

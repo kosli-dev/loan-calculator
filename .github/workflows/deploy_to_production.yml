@@ -26,19 +26,11 @@ jobs:
     - name: Make Docker image name available for following steps
       run: |
         echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
-        # echo "UNTAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
 
-    - env:
-        X_MERKELY_FINGERPRINT: docker://${TAGGED_IMAGE}
-        X_MERKELY_DESCRIPTION: "Deployed to ${MERKELY_ENVIRONMENT} in pipeline"
-        X_MERKELY_ENVIRONMENT: production
-        X_MERKELY_CI_BUILD_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-        X_MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+    - name: Deploy to production
       run: |
-        #make docker_pull
         docker pull ${{ env.TAGGED_IMAGE }}
 
-        #make merkely_control_deployment
         docker run \
             --env MERKELY_COMMAND=control_deployment \
             --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
@@ -50,8 +42,6 @@ jobs:
 
         echo YOUR DEPLOYMENT COMMAND HERE
 
-        #export MERKELY_DESCRIPTION="Deployed to production in CI by ${GITHUB_ACTOR}"
-        #make merkely_log_deployment
         docker run \
             --env MERKELY_COMMAND=log_deployment \
             --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
