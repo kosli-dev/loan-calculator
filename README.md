@@ -16,7 +16,7 @@ Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 | `MERKELY_API_TOKEN` | Your Merkely api token is in [your profile page](https://app.compliancedb.com/settings/profile). |
 | `DOCKERHUB_DEPLOY_USERNAME` | Your dockerhub username |
 | `DOCKERHUB_REPO_OWNER` | Your repository owner in dockerhub, typically the same as `DOCKERHUB_DEPLOY_USERNAME` |
-| `DOCKERHUB_DEPLOY_TOKEN` | For deploying your docker image, you will need to make a [personal access token](https://docs.docker.com/docker-hub/access-tokens/) |
+| `DOCKERHUB_DEPLOY_TOKEN` | For deploying your docker image, you will need to create a [personal access token](https://docs.docker.com/docker-hub/access-tokens/) |
 
 
 For example:
