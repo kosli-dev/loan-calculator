@@ -13,6 +13,6 @@ pipelines:
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
+              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
 
