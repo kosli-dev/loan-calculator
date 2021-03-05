@@ -17,7 +17,6 @@ pipelines:
     - step:
         name: Declare Merkely Pipeline
         script:
-          - ls -al
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
@@ -27,7 +26,6 @@ pipelines:
     - step:
         name: Build and Publish Docker Image
         script:
-          - ls -al
           - export $(cat ENV_VARS.txt | xargs)
           - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
           - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
@@ -35,3 +33,20 @@ pipelines:
           - docker push ${TAGGED_IMAGE}
           - docker push ${LATEST_IMAGE}
 
+    - step:
+        name: Log Docker Image in Merkely
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker run
+            --env MERKELY_COMMAND=log_artifact
+            --env MERKELY_FINGERPRINT=docker://${TAGGED_IMAGE}
+            --env MERKELY_IS_COMPLIANT=TRUE
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env BITBUCKET_WORKSPACE
+            --env BITBUCKET_REPO_SLUG
+            --env BITBUCKET_COMMIT
+            --env BITBUCKET_BUILD_NUMBER
+            --rm
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            --volume=/var/run/docker.sock:/var/run/docker.sock
+            merkely/change
