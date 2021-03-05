@@ -1,3 +1,6 @@
+options:
+  docker: true
+  
 image: atlassian/default-image:2
 
 pipelines:
