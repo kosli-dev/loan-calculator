@@ -10,10 +10,12 @@ pipelines:
         script:
           - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
           - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
+          - ls -al
 
     - step:
         name: Declare Merkely Pipeline
         script:
+          - ls -al
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
@@ -23,6 +25,8 @@ pipelines:
     - step:
         name: Build and Publish Docker Image
         script:
+          - ls -al
+          - fsdfsdf
           - export $(cat ENV_VARS.txt | xargs)
           - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
           - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
