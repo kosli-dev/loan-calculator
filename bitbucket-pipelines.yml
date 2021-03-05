@@ -1,6 +1,6 @@
 options:
   docker: true
-  
+
 image: atlassian/default-image:2
 
 pipelines:
@@ -8,9 +8,11 @@ pipelines:
     - step:
         name: Declare Merkely Pipeline
         script:
-          - docker run --rm \
-              --env MERKELY_COMMAND=declare_pipeline \
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN} \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
+          - pwd
+          - ls -al
+          - docker run --rm
+              --env MERKELY_COMMAND=declare_pipeline
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
               merkely/change
 
