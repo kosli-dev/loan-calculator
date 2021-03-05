@@ -6,13 +6,27 @@ image: atlassian/default-image:2
 pipelines:
   default:
     - step:
+        name: Make Docker image names available for following steps
+        script:
+          - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
+          - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
+
+    - step:
         name: Declare Merkely Pipeline
         script:
-          - pwd
-          - ls -al
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
               --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
+
+    - step:
+        name: Build and Publish Docker Image
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
+          - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
+          - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
+          - docker push ${TAGGED_IMAGE}
+          - docker push ${LATEST_IMAGE}
 
