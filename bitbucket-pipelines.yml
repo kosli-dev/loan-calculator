@@ -1,5 +1,3 @@
-options:
-  docker: true
 
 image: atlassian/default-image:2
 
@@ -16,6 +14,10 @@ pipelines:
 
     - step:
         name: Declare Merkely Pipeline
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
@@ -26,6 +28,10 @@ pipelines:
 
     - step:
         name: Build and publish Docker image
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
@@ -37,6 +43,10 @@ pipelines:
 
     - step:
         name: Make Docker image digest available for following steps
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker pull ${TAGGED_IMAGE}
@@ -48,6 +58,10 @@ pipelines:
 
     - step:
         name: Log Docker image in Merkely
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker run
@@ -63,8 +77,13 @@ pipelines:
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
 
+
     - step:
         name: Run unit tests and log results in Merkely
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - export $(cat ENV_VARS.txt | xargs)
           # Run the units tests, write results to build/test/pytest_unit.xml
@@ -89,3 +108,35 @@ pipelines:
               --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml
               --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
+
+
+    - step:
+        name: Run security analysis and log results in Merkely
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          # Run bandit security, write results directly to build/security/security.xml
+          - mkdir -p build/security
+          - docker run
+              --rm
+              --volume ${PWD}/build:/code/build
+              --entrypoint ./entrypoint-security.sh
+              ${TAGGED_IMAGE}
+          # Log security results in Merkely
+          - SECURITY_RESULTS_FILE=build/security/security.xml
+          - docker run
+            --env MERKELY_COMMAND=log_test
+            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+            --env MERKELY_EVIDENCE_TYPE=security
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env BITBUCKET_WORKSPACE
+            --env BITBUCKET_REPO_SLUG
+            --env BITBUCKET_BUILD_NUMBER
+            --rm
+            --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            merkely/change
+
