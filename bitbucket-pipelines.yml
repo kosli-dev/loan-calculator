@@ -13,6 +13,7 @@ pipelines:
         artifacts:
           - ENV_VARS.txt
 
+
     - step:
         name: Declare Merkely Pipeline
         script:
@@ -21,6 +22,7 @@ pipelines:
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
               --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
+
 
     - step:
         name: Build and publish Docker image
@@ -32,6 +34,7 @@ pipelines:
           - docker push ${TAGGED_IMAGE}
           - docker push ${LATEST_IMAGE}
 
+
     - step:
         name: Make Docker image digest available for following steps
         script:
@@ -39,6 +42,9 @@ pipelines:
           - docker pull ${TAGGED_IMAGE}
           - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
           - echo "SHA256=${SHA256}" >> ENV_VARS.txt
+        artifacts:
+          - ENV_VARS.txt
+
 
     - step:
         name: Log Docker image in Merkely
@@ -69,7 +75,6 @@ pipelines:
           - mkdir -p build/test
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
-
           # Log test results in Merkely
           - TEST_RESULTS_FILE=build/test/pytest_unit.xml
           - docker run
