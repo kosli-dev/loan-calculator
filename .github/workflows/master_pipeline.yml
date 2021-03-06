@@ -53,7 +53,7 @@ jobs:
               --env GITHUB_RUN_ID \
               --rm \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume /var/run/docker.sock:/var/run/docker.sock \
               merkely/change
 
 
@@ -137,7 +137,7 @@ jobs:
               --env GITHUB_REPOSITORY \
               --env GITHUB_RUN_ID \
               --rm \
-              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume /var/run/docker.sock:/var/run/docker.sock \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
               merkely/change
 
@@ -158,6 +158,6 @@ jobs:
               --env GITHUB_REPOSITORY \
               --env GITHUB_RUN_ID \
               --rm \
-              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume /var/run/docker.sock:/var/run/docker.sock \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
               merkely/change

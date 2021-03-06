@@ -10,7 +10,6 @@ pipelines:
         script:
           - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
           - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
-          - ls -al
         artifacts:
           - ENV_VARS.txt
 
@@ -36,6 +35,8 @@ pipelines:
     - step:
         name: Log Docker Image in Merkely
         script:
+          - docker image ls | grep ${TAGGED_IMAGE}
+          - docker inspect --format='{{.RepoDigests}}' ${TAGGED_IMAGE}
           - export $(cat ENV_VARS.txt | xargs)
           - docker run
             --env MERKELY_COMMAND=log_artifact
@@ -48,5 +49,5 @@ pipelines:
             --env BITBUCKET_BUILD_NUMBER
             --rm
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            --volume=/var/run/docker.sock:/var/run/docker.sock
+            --volume /var/run/docker.sock:/var/run/docker.sock
             merkely/change
