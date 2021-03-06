@@ -35,8 +35,9 @@ pipelines:
     - step:
         name: Log Docker Image in Merkely
         script:
+          # You can't volume-mount the docker-socket on Bitbucket.
+          # So how to fingerprint the image?
           - export $(cat ENV_VARS.txt | xargs)
-          - docker inspect --format='{{.RepoDigests}}' ${TAGGED_IMAGE}
           - docker run
             --env MERKELY_COMMAND=log_artifact
             --env MERKELY_FINGERPRINT=docker://${TAGGED_IMAGE}
@@ -48,5 +49,4 @@ pipelines:
             --env BITBUCKET_BUILD_NUMBER
             --rm
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            --volume /var/run/docker.sock:/var/run/docker.sock
             merkely/change
