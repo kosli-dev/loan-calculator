@@ -1,6 +1,6 @@
 {
-    "name": "bitbucket-loancalculator",
     "owner": "compliancedb",
+    "name": "bitbucket-loancalculator",
     "description": "The loan calculator application",
     "visibility": "private",
     "template": [
