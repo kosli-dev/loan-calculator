@@ -23,7 +23,7 @@ pipelines:
               merkely/change
 
     - step:
-        name: Build and Publish Docker Image
+        name: Build and publish Docker image
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
@@ -33,12 +33,17 @@ pipelines:
           - docker push ${LATEST_IMAGE}
 
     - step:
-        name: Log Docker Image in Merkely
+        name: Make Docker image digest available for following steps
         script:
-          # On bitbucket you can't volume-mount the docker-socket.
           - export $(cat ENV_VARS.txt | xargs)
           - docker pull ${TAGGED_IMAGE}
           - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
+          - echo "SHA256=${SHA256}" >> ENV_VARS.txt
+
+    - step:
+        name: Log Docker image in Merkely
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
           - docker run
             --env MERKELY_COMMAND=log_artifact
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
@@ -51,3 +56,31 @@ pipelines:
             --rm
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
+
+    - step:
+        name: Run unit tests and log results in Merkely
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          # Run the units tests, write results to build/test/pytest_unit.xml
+          - docker run
+            --name container
+            --entrypoint ./entrypoint-unit_test.sh
+            ${TAGGED_IMAGE}
+          - mkdir -p build/test
+          - docker cp container:/code/build/test/ ${PWD}/build
+          - docker rm container
+
+          # Log test results in Merkely
+          - TEST_RESULTS_FILE=build/test/pytest_unit.xml
+          - docker run
+              --env MERKELY_COMMAND=log_test
+              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+              --env MERKELY_EVIDENCE_TYPE=unit_test
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env BITBUCKET_WORKSPACE
+              --env BITBUCKET_REPO_SLUG
+              --env BITBUCKET_BUILD_NUMBER
+              --rm
+              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml
+              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+              merkely/change
