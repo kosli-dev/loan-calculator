@@ -35,9 +35,9 @@ pipelines:
     - step:
         name: Log Docker Image in Merkely
         script:
+          - export $(cat ENV_VARS.txt | xargs)
           - docker image ls | grep ${TAGGED_IMAGE}
           - docker inspect --format='{{.RepoDigests}}' ${TAGGED_IMAGE}
-          - export $(cat ENV_VARS.txt | xargs)
           - docker run
             --env MERKELY_COMMAND=log_artifact
             --env MERKELY_FINGERPRINT=docker://${TAGGED_IMAGE}
