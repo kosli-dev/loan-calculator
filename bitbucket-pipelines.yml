@@ -168,5 +168,5 @@ pipelines:
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
               --rm
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
+              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
