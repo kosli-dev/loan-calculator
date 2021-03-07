@@ -14,10 +14,8 @@ pipelines:
 
     - step:
         name: Declare Merkely Pipeline
-        services:
-          - docker
-        caches:
-          - docker
+        services: [docker]
+        caches: [docker]
         script:
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
