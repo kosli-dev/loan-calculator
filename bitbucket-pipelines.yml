@@ -179,6 +179,7 @@ pipelines:
         caches:
           - docker
         script:
+          - export $(cat ENV_VARS.txt | xargs)
           # Deploy to staging
           - echo YOUR DEPLOYMENT COMMAND HERE
           # Log deployment to staging in Merkely
