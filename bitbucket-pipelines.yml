@@ -14,8 +14,8 @@ pipelines:
 
     - step:
         name: Declare Merkely Pipeline
-        services: [docker]
-        caches: [docker]
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - docker run --rm
               --env MERKELY_COMMAND=declare_pipeline
@@ -26,10 +26,8 @@ pipelines:
 
     - step:
         name: Build and publish Docker image
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
@@ -41,10 +39,8 @@ pipelines:
 
     - step:
         name: Make Docker image digest available for following steps
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker pull ${TAGGED_IMAGE}
@@ -56,10 +52,8 @@ pipelines:
 
     - step:
         name: Log Docker image in Merkely
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           - docker run
@@ -78,10 +72,8 @@ pipelines:
 
     - step:
         name: Run unit tests and log results in Merkely
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           # Run the units tests, write results to build/test/pytest_unit.xml
@@ -110,10 +102,8 @@ pipelines:
 
     - step:
         name: Run security analysis and log results in Merkely
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           # Run bandit security, write results directly to build/security/security.xml
@@ -140,10 +130,8 @@ pipelines:
 
     - step:
         name: Run coverage and log results in Merkely
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           # Run coverage, write summary to build/coverage/coverage_summary.sh
@@ -172,10 +160,8 @@ pipelines:
 
     - step:
         name: Deploy to staging and log deployment in Merkely
-        services:
-          - docker
-        caches:
-          - docker
+        services: [ docker ]
+        caches: [ docker ]
         script:
           - export $(cat ENV_VARS.txt | xargs)
           # Deploy to staging
