@@ -140,3 +140,33 @@ pipelines:
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
 
+    - step:
+        name: Run coverage and log results in Merkely
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          # Run coverage, write summary to build/coverage/coverage_summary.sh
+          - mkdir -p build/coverage
+          - docker run
+                  --rm
+                  --volume ${PWD}/build:/code/build
+                  --entrypoint ./entrypoint-coverage.sh
+                  ${TAGGED_IMAGE}
+          - source build/coverage/coverage_summary.sh
+          # Log coverage summary in Merkely
+          - docker run
+              --env MERKELY_COMMAND=log_evidence
+              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+              --env MERKELY_EVIDENCE_TYPE=coverage
+              --env MERKELY_IS_COMPLIANT=TRUE
+              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env BITBUCKET_WORKSPACE
+              --env BITBUCKET_REPO_SLUG
+              --env BITBUCKET_BUILD_NUMBER
+              --rm
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
+              merkely/change
