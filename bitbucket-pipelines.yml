@@ -45,10 +45,22 @@ definitions:
             merkely/change
 
 
+    -step: &merkely_setup_image_digest_env_var
+        name: Make Docker image digest available for following steps
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker pull ${TAGGED_IMAGE}
+          - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
+          - echo "SHA256=${SHA256}" >> ENV_VARS.txt
+        artifacts:
+          - ENV_VARS.txt
+
+
 pipelines:
   default:
     - step: *merkely_setup_image_env_vars
-
     - step: *merkely_declare_pipeline
 
     - step:
@@ -64,19 +76,7 @@ pipelines:
           - docker push ${LATEST_IMAGE}
 
 
-    - step:
-        name: Make Docker image digest available for following steps
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - export $(cat ENV_VARS.txt | xargs)
-          - docker pull ${TAGGED_IMAGE}
-          - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
-          - echo "SHA256=${SHA256}" >> ENV_VARS.txt
-        artifacts:
-          - ENV_VARS.txt
-
-
+    - step: *merkely_setup_image_digest_env_var
     - step: *merkely_log_docker_image
 
     - step:
