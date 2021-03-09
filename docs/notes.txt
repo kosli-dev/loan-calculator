@@ -1,0 +1,33 @@
+
+Bitbucket does not allow you to volume-mount the docker socket in the pipeline .yml files.
+It does allow volume-mounts relative to the bitbucket source repo dir.
+At the moment I am using
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker pull ${TAGGED_IMAGE}
+          - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
+          - echo "SHA256=${SHA256}" >> ENV_VARS.txt
+        artifacts:
+          - ENV_VARS.txt
+
+and then in the step:
+
+            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+
+
+
+The Merkelypipe.json file for bitbucket is
+Merkelypipe.bitbucket.json
+This must be volume-mounted to /data/Merkelypipe.json
+
+
+
+Bitbucket has ways of creating reusable yml.
+Eg a pipe: 
+https://support.atlassian.com/bitbucket-cloud/docs/write-a-pipe-for-bitbucket-pipelines/
+https://support.atlassian.com/bitbucket-cloud/docs/what-are-pipes/
+These allow variables: which are env-vars passed into the pipe.
+
+
+
+

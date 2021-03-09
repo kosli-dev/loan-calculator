@@ -4,6 +4,15 @@ image: atlassian/default-image:2
 
 definitions:
   steps:
+    - step: &merkely_setup_image_env_vars
+        name: Make Docker image names available for following steps
+        script:
+          - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
+          - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
+        artifacts:
+          - ENV_VARS.txt
+
+
     - step: &merkely_declare_pipeline
         name: Declare Merkely Pipeline
         services: [ docker ]
@@ -16,16 +25,29 @@ definitions:
             merkely/change
 
 
+    - step: &merkely_log_docker_image
+        name: Log Docker image in Merkely
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker run
+            --env MERKELY_COMMAND=log_artifact
+            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+            --env MERKELY_IS_COMPLIANT=TRUE
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env BITBUCKET_WORKSPACE
+            --env BITBUCKET_REPO_SLUG
+            --env BITBUCKET_COMMIT
+            --env BITBUCKET_BUILD_NUMBER
+            --rm
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            merkely/change
+
+
 pipelines:
   default:
-    - step:
-        name: Make Docker image names available for following steps
-        script:
-          - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
-          - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
-        artifacts:
-          - ENV_VARS.txt
-
+    - step: *merkely_setup_image_env_vars
 
     - step: *merkely_declare_pipeline
 
@@ -55,25 +77,7 @@ pipelines:
           - ENV_VARS.txt
 
 
-    - step:
-        name: Log Docker image in Merkely
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - export $(cat ENV_VARS.txt | xargs)
-          - docker run
-            --env MERKELY_COMMAND=log_artifact
-            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-            --env MERKELY_IS_COMPLIANT=TRUE
-            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env BITBUCKET_WORKSPACE
-            --env BITBUCKET_REPO_SLUG
-            --env BITBUCKET_COMMIT
-            --env BITBUCKET_BUILD_NUMBER
-            --rm
-            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            merkely/change
-
+    - step: *merkely_log_docker_image
 
     - step:
         name: Run unit tests and log results in Merkely
