@@ -1,6 +1,7 @@
 
 image: atlassian/default-image:2
 
+
 definitions:
   services: [ docker ]
   declare_pipeline: &merkely_declare_pipeline
