@@ -58,6 +58,26 @@ definitions:
           - ENV_VARS.txt
 
 
+    - step: &merkely_log_deployment
+        name: Log deployment in Merkely
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - export $(cat ENV_VARS.txt | xargs)
+          - docker run
+              --env MERKELY_COMMAND=log_deployment
+              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+              --env MERKELY_DESCRIPTION="Deployed to staging in pipeline"
+              --env MERKELY_ENVIRONMENT=staging
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env BITBUCKET_WORKSPACE
+              --env BITBUCKET_REPO_SLUG
+              --env BITBUCKET_BUILD_NUMBER
+              --rm
+              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+              merkely/change
+
+
 pipelines:
   default:
     - step: *merkely_setup_image_env_vars
@@ -168,23 +188,8 @@ pipelines:
 
 
     - step:
-        name: Deploy to staging and log deployment in Merkely
-        services: [ docker ]
-        caches: [ docker ]
+        name: Deploy to staging
         script:
-          - export $(cat ENV_VARS.txt | xargs)
-          # Deploy to staging
           - echo YOUR DEPLOYMENT COMMAND HERE
-          # Log deployment to staging in Merkely
-          - docker run
-              --env MERKELY_COMMAND=log_deployment
-              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-              --env MERKELY_DESCRIPTION="Deployed to staging in pipeline"
-              --env MERKELY_ENVIRONMENT=staging
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env BITBUCKET_WORKSPACE
-              --env BITBUCKET_REPO_SLUG
-              --env BITBUCKET_BUILD_NUMBER
-              --rm
-              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-              merkely/change
+
+    - step: *merkely_log_deployment
