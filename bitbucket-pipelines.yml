@@ -3,12 +3,17 @@ image: atlassian/default-image:2
 
 
 definitions:
-  services: [ docker ]
-  declare_pipeline: &merkely_declare_pipeline
-    pipe: docker://merkely/change:latest
-    variables:
-      MERKELY_COMMAND: declare_pipeline
-      MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
+  steps:
+    - step: &merkely_declare_pipeline
+        name: Declare Merkely Pipeline
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - docker run --rm
+            --env MERKELY_COMMAND=declare_pipeline
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            merkely/change
 
 
 pipelines:
@@ -23,9 +28,6 @@ pipelines:
 
 
     - step: *merkely_declare_pipeline
-        name: Declare Merkely Pipeline
-        caches: [ docker ]
-
 
     - step:
         name: Build and publish Docker image
