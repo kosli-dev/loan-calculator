@@ -8,6 +8,7 @@ definitions:
     export TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)
 
   export_image_sha256_env_var: &export_image_sha256_env_var |
+    docker pull ${TAGGED_IMAGE}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
 
   steps:
