@@ -2,6 +2,6 @@
 
 # A docker image entrypoint for gathering security data
 set -e
-rm -rf build/security
+rm -rf build/security || true
 mkdir -p build/security
-bandit -r src -f xml -o build/security/security.xml
+bandit --recursive src --format xml --output build/security/security.xml
