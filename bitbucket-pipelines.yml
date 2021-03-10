@@ -8,7 +8,6 @@ definitions:
     export TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)
 
   export_image_sha256_env_var: &export_image_sha256_env_var |
-    docker pull ${TAGGED_IMAGE}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
 
   steps:
@@ -159,6 +158,8 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
+          - *export_image_name_env_vars
+          - *export_image_sha256_env_var
           - source build/coverage/coverage_summary.sh
           - docker run
               --env MERKELY_COMMAND=log_evidence
