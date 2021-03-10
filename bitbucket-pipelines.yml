@@ -13,15 +13,6 @@ definitions:
 
   steps:
 
-    - step: &merkely_setup_image_env_vars
-        name: Make Docker image names available for following steps
-        script:
-          - echo "LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest" > ENV_VARS.txt
-          - echo "TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)" >> ENV_VARS.txt
-        artifacts:
-          - ENV_VARS.txt
-
-
     - step: &merkely_declare_pipeline
         name: Declare Merkely Pipeline
         services: [ docker ]
@@ -47,7 +38,6 @@ definitions:
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
             --env MERKELY_IS_COMPLIANT=TRUE
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
             --env BITBUCKET_WORKSPACE
             --env BITBUCKET_REPO_SLUG
             --env BITBUCKET_COMMIT
@@ -55,19 +45,6 @@ definitions:
             --rm
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
-
-
-    - step: &merkely_setup_image_digest_env_var
-        name: Make Docker image digest available for following steps
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - export $(cat ENV_VARS.txt | xargs)
-          - docker pull ${TAGGED_IMAGE}
-          - SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
-          - echo "SHA256=${SHA256}" >> ENV_VARS.txt
-        artifacts:
-          - ENV_VARS.txt
 
 
     - step: &merkely_log_deployment
@@ -83,7 +60,6 @@ definitions:
               --env MERKELY_DESCRIPTION="Deployed to staging in pipeline"
               --env MERKELY_ENVIRONMENT=staging
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
@@ -96,7 +72,6 @@ pipelines:
   default:
     - step: *export_image_env_vars
     - step: *merkely_declare_pipeline
-
     - step:
         name: Build and publish Docker image
         services: [ docker ]
@@ -110,10 +85,7 @@ pipelines:
           - docker push ${TAGGED_IMAGE}
           - docker push ${LATEST_IMAGE}
 
-
-    - step: *merkely_setup_image_digest_env_var
     - step: *merkely_log_docker_image
-
     - step:
         name: Run unit tests and log results in Merkely
         services: [ docker ]
@@ -136,7 +108,6 @@ pipelines:
               --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
               --env MERKELY_EVIDENCE_TYPE=unit_test
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
@@ -144,7 +115,6 @@ pipelines:
               --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml
               --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
-
 
     - step:
         name: Run security analysis and log results in Merkely
@@ -167,7 +137,6 @@ pipelines:
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
             --env MERKELY_EVIDENCE_TYPE=security
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
             --env BITBUCKET_WORKSPACE
             --env BITBUCKET_REPO_SLUG
             --env BITBUCKET_BUILD_NUMBER
@@ -199,14 +168,12 @@ pipelines:
               --env MERKELY_IS_COMPLIANT=TRUE
               --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
               --rm
               --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
               merkely/change
-
 
     - step:
         name: Deploy to staging
