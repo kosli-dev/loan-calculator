@@ -4,6 +4,13 @@ image: atlassian/default-image:2
 
 definitions:
   steps:
+    - step: &export_image_env_vars
+        name: Make Docker image names available for following steps
+        script:
+          - export LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest
+          - export TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)
+
+
     - step: &merkely_setup_image_env_vars
         name: Make Docker image names available for following steps
         script:
@@ -83,7 +90,7 @@ definitions:
 
 pipelines:
   default:
-    - step: *merkely_setup_image_env_vars
+    - step: *export_image_env_vars
     - step: *merkely_declare_pipeline
 
     - step:
