@@ -100,6 +100,87 @@ definitions:
               merkely/change
 
 
+    - step: &run_security_analysis
+        name: Run Security Analysis, Write Results to build/security/security.xml
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - *export_image_name_env_vars
+          - mkdir -p build/security
+          - docker run
+              --rm
+              --volume ${PWD}/build:/code/build
+              --entrypoint ./entrypoint-security.sh
+              ${TAGGED_IMAGE}
+        artifacts:
+          - build/security/security.xml
+
+
+    - step: &merkely_log_security_results
+        name: Log Security Results in Merkely
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - *export_image_name_env_vars
+          - *export_image_sha256_env_var
+          - SECURITY_RESULTS_FILE=build/security/security.xml
+          - docker run
+            --env MERKELY_COMMAND=log_test
+            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+            --env MERKELY_EVIDENCE_TYPE=security
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env BITBUCKET_WORKSPACE
+            --env BITBUCKET_REPO_SLUG
+            --env BITBUCKET_BUILD_NUMBER
+            --rm
+            --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            merkely/change
+
+
+    - step: &run_coverage_analysis
+        name: Run Coverage Analysis, Write Summary to build/coverage/coverage_summary.sh
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - *export_image_name_env_vars
+          - mkdir -p build/coverage
+          - docker run
+                  --rm
+                  --volume ${PWD}/build:/code/build
+                  --entrypoint ./entrypoint-coverage.sh
+                  ${TAGGED_IMAGE}
+        artifacts:
+          - build/coverage/coverage_summary.sh
+
+
+    - step: &merkely_log_coverage_results
+        name: Log Coverage Analysis Results in Merkely
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - source build/coverage/coverage_summary.sh
+          - docker run
+              --env MERKELY_COMMAND=log_evidence
+              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
+              --env MERKELY_EVIDENCE_TYPE=coverage
+              --env MERKELY_IS_COMPLIANT=TRUE
+              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
+              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env BITBUCKET_WORKSPACE
+              --env BITBUCKET_REPO_SLUG
+              --env BITBUCKET_BUILD_NUMBER
+              --rm
+              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+              merkely/change
+
+
+    - step: &deploy_to_staging
+        name: Deploy to staging
+        script:
+          - echo YOUR DEPLOYMENT COMMAND HERE
+
+
     - step: &merkely_log_deployment
         name: Log deployment in Merkely
         services: [ docker ]
@@ -128,68 +209,9 @@ pipelines:
     - step: *merkely_log_docker_image
     - step: *run_unit_tests
     - step: *merkely_log_unit_tests_results
-    - step:
-        name: Run security analysis and log results in Merkely
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
-          # Run bandit security, write results directly to build/security/security.xml
-          - mkdir -p build/security
-          - docker run
-              --rm
-              --volume ${PWD}/build:/code/build
-              --entrypoint ./entrypoint-security.sh
-              ${TAGGED_IMAGE}
-          # Log security results in Merkely
-          - SECURITY_RESULTS_FILE=build/security/security.xml
-          - docker run
-            --env MERKELY_COMMAND=log_test
-            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-            --env MERKELY_EVIDENCE_TYPE=security
-            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env BITBUCKET_WORKSPACE
-            --env BITBUCKET_REPO_SLUG
-            --env BITBUCKET_BUILD_NUMBER
-            --rm
-            --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml
-            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            merkely/change
-
-    - step:
-        name: Run coverage and log results in Merkely
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
-          # Run coverage, write summary to build/coverage/coverage_summary.sh
-          - mkdir -p build/coverage
-          - docker run
-                  --rm
-                  --volume ${PWD}/build:/code/build
-                  --entrypoint ./entrypoint-coverage.sh
-                  ${TAGGED_IMAGE}
-          - source build/coverage/coverage_summary.sh
-          # Log coverage summary in Merkely
-          - docker run
-              --env MERKELY_COMMAND=log_evidence
-              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-              --env MERKELY_EVIDENCE_TYPE=coverage
-              --env MERKELY_IS_COMPLIANT=TRUE
-              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env BITBUCKET_WORKSPACE
-              --env BITBUCKET_REPO_SLUG
-              --env BITBUCKET_BUILD_NUMBER
-              --rm
-              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-              merkely/change
-
-    - step:
-        name: Deploy to staging
-        script:
-          - echo YOUR DEPLOYMENT COMMAND HERE
-
+    - step: *run_security_analysis
+    - step: *merkely_log_security_results
+    - step: *run_coverage_analysis
+    - step: *merkely_log_coverage_results
+    - step: *deploy_to_staging
     - step: *merkely_log_deployment
