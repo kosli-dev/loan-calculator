@@ -21,6 +21,7 @@ definitions:
           - docker run --rm
             --env MERKELY_COMMAND=declare_pipeline
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
 
@@ -36,6 +37,7 @@ definitions:
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
             --env MERKELY_IS_COMPLIANT=TRUE
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
             --env BITBUCKET_WORKSPACE
             --env BITBUCKET_REPO_SLUG
             --env BITBUCKET_COMMIT
@@ -70,6 +72,7 @@ definitions:
               --env MERKELY_DESCRIPTION="Deployed to staging in pipeline"
               --env MERKELY_ENVIRONMENT=staging
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
@@ -120,6 +123,7 @@ pipelines:
               --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
               --env MERKELY_EVIDENCE_TYPE=unit_test
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
@@ -149,6 +153,7 @@ pipelines:
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
             --env MERKELY_EVIDENCE_TYPE=security
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
             --env BITBUCKET_WORKSPACE
             --env BITBUCKET_REPO_SLUG
             --env BITBUCKET_BUILD_NUMBER
@@ -179,6 +184,7 @@ pipelines:
               --env MERKELY_IS_COMPLIANT=TRUE
               --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
               --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+              --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
               --env BITBUCKET_WORKSPACE
               --env BITBUCKET_REPO_SLUG
               --env BITBUCKET_BUILD_NUMBER
