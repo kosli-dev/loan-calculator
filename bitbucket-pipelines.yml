@@ -26,6 +26,19 @@ definitions:
             merkely/change
 
 
+    - step: &build_and_publish_docker_image
+        name: Build and publish Docker image
+        services: [ docker ]
+        caches: [ docker ]
+        script:
+          - *export_image_name_env_vars
+          - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
+          - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
+          - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
+          - docker push ${TAGGED_IMAGE}
+          - docker push ${LATEST_IMAGE}
+
+
     - step: &merkely_log_docker_image
         name: Log Docker image in Merkely
         services: [ docker ]
@@ -71,19 +84,7 @@ definitions:
 pipelines:
   default:
     - step: *merkely_declare_pipeline
-    - step:
-        name: Build and publish Docker image
-        services: [ docker ]
-        caches: [ docker ]
-        script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
-          - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
-          - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
-          - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
-          - docker push ${TAGGED_IMAGE}
-          - docker push ${LATEST_IMAGE}
-
+    - step: *build_and_publish_docker_image
     - step: *merkely_log_docker_image
     - step:
         name: Run unit tests and log results in Merkely
