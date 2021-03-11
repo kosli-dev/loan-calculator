@@ -20,7 +20,6 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - docker pull merkely/change:latest
           - docker run
             --env MERKELY_COMMAND=declare_pipeline
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
@@ -165,6 +164,7 @@ definitions:
           - *export_image_name_env_vars
           - *export_image_sha256_env_var
           - source build/coverage/coverage_summary.sh
+          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_evidence"
@@ -190,6 +190,7 @@ definitions:
         script:
           - *export_image_name_env_vars
           - *export_image_sha256_env_var
+          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
