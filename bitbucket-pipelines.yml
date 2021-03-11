@@ -4,8 +4,10 @@ image: atlassian/default-image:2
 
 definitions:
   export_image_name_env_vars: &export_image_name_env_vars |
-    export LATEST_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest
-    export TAGGED_IMAGE=${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)
+    export MERKELY_OWNER="compliancedb"
+    export MERKELY_PIPELINE="bitbucket-loancalculator"
+    export LATEST_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
+    export TAGGED_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
 
   export_image_sha256_env_var: &export_image_sha256_env_var |
     docker pull ${TAGGED_IMAGE}
@@ -165,8 +167,8 @@ definitions:
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_evidence"
-              MERKELY_OWNER: "compliancedb"
-              MERKELY_PIPELINE: "bitbucket-loancalculator"
+              MERKELY_OWNER: "${MERKELY_OWNER}"
+              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
               MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
               MERKELY_EVIDENCE_TYPE: "coverage"
               MERKELY_IS_COMPLIANT: "TRUE"
@@ -187,18 +189,15 @@ definitions:
         script:
           - *export_image_name_env_vars
           - *export_image_sha256_env_var
-          - docker run
-              --env MERKELY_COMMAND=log_deployment
-              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-              --env MERKELY_DESCRIPTION="Deployed to staging in pipeline"
-              --env MERKELY_ENVIRONMENT=staging
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env BITBUCKET_WORKSPACE
-              --env BITBUCKET_REPO_SLUG
-              --env BITBUCKET_BUILD_NUMBER
-              --rm
-              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-              merkely/change
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "log_deployment"
+              MERKELY_OWNER: "${MERKELY_OWNER}"
+              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
+              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
+              MERKELY_ENVIRONMENT: "staging"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
 pipelines:
