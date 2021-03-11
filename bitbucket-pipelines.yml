@@ -162,6 +162,7 @@ definitions:
           - *export_image_name_env_vars
           - *export_image_sha256_env_var
           - source build/coverage/coverage_summary.sh
+          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_evidence"
