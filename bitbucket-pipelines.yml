@@ -169,7 +169,7 @@ definitions:
               MERKELY_PIPELINE: "bitbucket-loancalculator"
               MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
               MERKELY_EVIDENCE_TYPE: coverage
-              MERKELY_IS_COMPLIANT: TRUE
+              MERKELY_IS_COMPLIANT: 'TRUE'
               MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
               MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
               BITBUCKET_WORKSPACE:
