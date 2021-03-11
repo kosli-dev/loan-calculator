@@ -20,14 +20,12 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - docker pull merkely/change:latest
-          - pipe: docker://merkely/change:latest
-            variables:
-              MERKELY_COMMAND: "declare_pipeline"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+          - docker run
+            --env MERKELY_COMMAND=declare_pipeline
+            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
+            --rm
+            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
+            merkely/change
 
 
     - step: &build_and_publish_docker_image
