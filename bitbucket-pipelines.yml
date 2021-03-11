@@ -18,10 +18,10 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - docker run --rm
+          - docker run
             --env MERKELY_COMMAND=declare_pipeline
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env MERKELY_PIPE_PATH=${PWD}/Merkelypipe.bitbucket.json
+            --rm
             --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
             merkely/change
 
@@ -146,10 +146,10 @@ definitions:
           - *export_image_name_env_vars
           - mkdir -p build/coverage
           - docker run
-                  --rm
-                  --volume ${PWD}/build:/code/build
-                  --entrypoint ./entrypoint-coverage.sh
-                  ${TAGGED_IMAGE}
+              --entrypoint ./entrypoint-coverage.sh
+              --rm
+              --volume ${PWD}/build:/code/build
+              ${TAGGED_IMAGE}
         artifacts:
           - build/coverage/coverage_summary.sh
 
@@ -162,19 +162,19 @@ definitions:
           - *export_image_name_env_vars
           - *export_image_sha256_env_var
           - source build/coverage/coverage_summary.sh
-          - docker run
-              --env MERKELY_COMMAND=log_evidence
-              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-              --env MERKELY_EVIDENCE_TYPE=coverage
-              --env MERKELY_IS_COMPLIANT=TRUE
-              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}"
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env BITBUCKET_WORKSPACE
-              --env BITBUCKET_REPO_SLUG
-              --env BITBUCKET_BUILD_NUMBER
-              --rm
-              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-              merkely/change
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: log_evidence
+              MERKELY_OWNER: compliancedb
+              MERKELY_PIPELINE: "bitbucket-loancalculator"
+              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_EVIDENCE_TYPE: coverage
+              MERKELY_IS_COMPLIANT: TRUE
+              MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
+              BITBUCKET_WORKSPACE:
+              BITBUCKET_REPO_SLUG:
+              BITBUCKET_BUILD_NUMBER:
 
 
     - step: &deploy_to_staging
