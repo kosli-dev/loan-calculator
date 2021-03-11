@@ -20,6 +20,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
+          - *export_image_name_env_vars
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
