@@ -172,9 +172,6 @@ definitions:
               MERKELY_IS_COMPLIANT: 'TRUE'
               MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
               MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
-              BITBUCKET_WORKSPACE: ${BITBUCKET_WORKSPACE}
-              BITBUCKET_REPO_SLUG: ${BITBUCKET_REPO_SLUG}
-              BITBUCKET_BUILD_NUMBER: ${BITBUCKET_BUILD_NUMBER}
 
 
     - step: &deploy_to_staging
