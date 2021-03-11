@@ -20,6 +20,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
+          - docker pull merkely/change:latest
           - docker run
             --env MERKELY_COMMAND=declare_pipeline
             --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
