@@ -109,7 +109,7 @@ definitions:
               MERKELY_COMMAND: "log_test"
               MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
               MERKELY_EVIDENCE_TYPE: "security"
-              MERKELY_TEST_RESULTS_DIR: "/code/build/security/"
+              MERKELY_TEST_RESULTS_DIR: "${PWD}/build/security/"
               MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
