@@ -7,9 +7,11 @@ definitions:
     export LATEST_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
     export TAGGED_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
 
-  export_image_sha256_env_var: &export_image_sha256_env_var |
+  export_fingerprint_env_var: &export_fingerprint_env_var |
+    export TAGGED_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     docker pull ${TAGGED_IMAGE}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
+    export MERKELY_FINGERPRINT="sha256://${SHA256}/${TAGGED_IMAGE}"
 
   steps:
 
@@ -44,13 +46,12 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
+          - *export_fingerprint_env_var
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_artifact"
-              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_IS_COMPLIANT: "TRUE"
               MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
@@ -61,8 +62,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
+          - *export_fingerprint_env_var
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -71,19 +71,15 @@ definitions:
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
           - # Log results in Merkely
-          - TEST_RESULTS_FILE=build/test/pytest_unit.xml
-          - docker run
-              --env MERKELY_COMMAND=log_test
-              --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-              --env MERKELY_EVIDENCE_TYPE=unit_test
-              --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-              --env BITBUCKET_WORKSPACE
-              --env BITBUCKET_REPO_SLUG
-              --env BITBUCKET_BUILD_NUMBER
-              --rm
-              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml
-              --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-              merkely/change
+          - docker pull merkely/change:latest
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "log_test"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_EVIDENCE_TYPE: "unit_test"
+              MERKELY_TEST_RESULTS_DIR: "${PWD}/build/test/"
+              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
     - step: &run_security_analysis
@@ -91,8 +87,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
+          - *export_fingerprint_env_var
           - mkdir -p build/security
           - docker run
               --rm
@@ -104,7 +99,7 @@ definitions:
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_test"
-              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_EVIDENCE_TYPE: "security"
               MERKELY_TEST_RESULTS_DIR: "${PWD}/build/security/"
               MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
@@ -116,8 +111,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
+          - *export_fingerprint_env_var
           - mkdir -p build/coverage
           - docker run
               --entrypoint ./entrypoint-coverage.sh
@@ -130,7 +124,7 @@ definitions:
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_evidence"
-              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_EVIDENCE_TYPE: "coverage"
               MERKELY_IS_COMPLIANT: "TRUE"
               MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
@@ -144,14 +138,13 @@ definitions:
         caches: [ docker ]
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
-          - *export_image_name_env_vars
-          - *export_image_sha256_env_var
+          - *export_fingerprint_env_var
           - # Log deployment in Merkely
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
-              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
               MERKELY_ENVIRONMENT: "staging"
               MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
