@@ -8,11 +8,14 @@ definitions:
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
 
-  set_fingerprint_env_var: &set_fingerprint_env_var |
+  set_merkely_fingerprint: &set_merkely_fingerprint |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     docker pull ${IMAGE_TAGGED}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
+
+  set_merkely_pipe_path: &set_merkely_pipe_path |
+    export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.bitbucket.json"
 
   steps:
 
@@ -20,10 +23,11 @@ definitions:
         name: Declare Merkely Pipeline
         services: [ docker ]
         script:
+          - *set_merkely_pipe_path
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "declare_pipeline"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
@@ -43,13 +47,14 @@ definitions:
         name: Log Docker image in Merkely
         services: [ docker ]
         script:
-          - *set_fingerprint_env_var
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_artifact"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_IS_COMPLIANT: "TRUE"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
@@ -57,7 +62,8 @@ definitions:
         name: Run units tests, log results in Merkely
         services: [ docker ]
         script:
-          - *set_fingerprint_env_var
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -72,7 +78,7 @@ definitions:
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_EVIDENCE_TYPE: "unit_test"
               MERKELY_TEST_RESULTS_DIR: "${PWD}/build/test/"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
@@ -80,7 +86,8 @@ definitions:
         name: Run security analysis, log results in Merkely
         services: [ docker ]
         script:
-          - *set_fingerprint_env_var
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
           - mkdir -p build/security
           - docker run
               --rm
@@ -94,7 +101,7 @@ definitions:
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_EVIDENCE_TYPE: "security"
               MERKELY_TEST_RESULTS_DIR: "${PWD}/build/security/"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
@@ -102,7 +109,8 @@ definitions:
         name: Run coverage analysis, log results in Merkely
         services: [ docker ]
         script:
-          - *set_fingerprint_env_var
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
           - mkdir -p build/coverage
           - docker run
               --entrypoint ./entrypoint-coverage.sh
@@ -118,7 +126,7 @@ definitions:
               MERKELY_EVIDENCE_TYPE: "coverage"
               MERKELY_IS_COMPLIANT: "TRUE"
               MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
@@ -127,7 +135,8 @@ definitions:
         services: [ docker ]
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
-          - *set_fingerprint_env_var
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
           - # Log deployment in Merkely
           - pipe: docker://merkely/change:latest
             variables:
@@ -135,7 +144,7 @@ definitions:
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
               MERKELY_ENVIRONMENT: "staging"
-              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
