@@ -3,6 +3,7 @@ image: atlassian/default-image:2
 
 
 definitions:
+  
   set_image_env_vars: &set_image_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
@@ -20,12 +21,12 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - docker run
-            --env MERKELY_COMMAND=declare_pipeline
-            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --rm
-            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            merkely/change
+          - docker pull merkely/change:latest
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "declare_pipeline"
+              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
     - step: &build_and_publish_docker_image
