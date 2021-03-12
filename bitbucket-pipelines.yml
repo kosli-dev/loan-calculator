@@ -103,19 +103,15 @@ definitions:
               --entrypoint ./entrypoint-security.sh
               ${TAGGED_IMAGE}
           - # Log results in Merkely
-          - SECURITY_RESULTS_FILE=build/security/security.xml
-          - docker run
-            --env MERKELY_COMMAND=log_test
-            --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
-            --env MERKELY_EVIDENCE_TYPE=security
-            --env MERKELY_API_TOKEN=${MERKELY_API_TOKEN}
-            --env BITBUCKET_WORKSPACE
-            --env BITBUCKET_REPO_SLUG
-            --env BITBUCKET_BUILD_NUMBER
-            --rm
-            --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml
-            --volume ${PWD}/Merkelypipe.bitbucket.json:/data/Merkelypipe.json
-            merkely/change
+          - docker pull merkely/change:latest
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "log_test"
+              MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
+              MERKELY_EVIDENCE_TYPE: "security"
+              MERKELY_TEST_RESULTS_DIR: "/code/build/security/"
+              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
     - step: &run_coverage_analysis
