@@ -3,7 +3,7 @@ image: atlassian/default-image:2
 
 
 definitions:
-  
+
   set_image_env_vars: &set_image_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
@@ -19,9 +19,7 @@ definitions:
     - step: &merkely_declare_pipeline
         name: Declare Merkely Pipeline
         services: [ docker ]
-        caches: [ docker ]
         script:
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "declare_pipeline"
@@ -32,7 +30,6 @@ definitions:
     - step: &build_and_publish_docker_image
         name: Build and publish Docker image
         services: [ docker ]
-        caches: [ docker ]
         script:
           - *set_image_env_vars
           - docker build --file ${PWD}/Dockerfile --tag ${IMAGE_TAGGED} ${PWD}
@@ -45,10 +42,8 @@ definitions:
     - step: &merkely_log_docker_image
         name: Log Docker image in Merkely
         services: [ docker ]
-        caches: [ docker ]
         script:
           - *set_fingerprint_env_var
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_artifact"
@@ -61,7 +56,6 @@ definitions:
     - step: &run_unit_tests
         name: Run units tests, log results in Merkely
         services: [ docker ]
-        caches: [ docker ]
         script:
           - *set_fingerprint_env_var
           - docker run
@@ -72,7 +66,6 @@ definitions:
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
           - # Log results in Merkely
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_test"
@@ -86,7 +79,6 @@ definitions:
     - step: &run_security_analysis
         name: Run security analysis, log results in Merkely
         services: [ docker ]
-        caches: [ docker ]
         script:
           - *set_fingerprint_env_var
           - mkdir -p build/security
@@ -96,7 +88,6 @@ definitions:
               --entrypoint ./entrypoint-security.sh
               ${IMAGE_TAGGED}
           - # Log results in Merkely
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_test"
@@ -110,7 +101,6 @@ definitions:
     - step: &run_coverage_analysis
         name: Run coverage analysis, log results in Merkely
         services: [ docker ]
-        caches: [ docker ]
         script:
           - *set_fingerprint_env_var
           - mkdir -p build/coverage
@@ -121,7 +111,6 @@ definitions:
               ${IMAGE_TAGGED}
           - # Log results in Merkely
           - source build/coverage/coverage_summary.sh
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_evidence"
@@ -136,12 +125,10 @@ definitions:
     - step: &deploy_to_staging
         name: Deploy to staging, log deployment in Merkely
         services: [ docker ]
-        caches: [ docker ]
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
           - *set_fingerprint_env_var
           - # Log deployment in Merkely
-          - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
