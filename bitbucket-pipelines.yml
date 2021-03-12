@@ -39,6 +39,7 @@ definitions:
           - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
           - docker push ${TAGGED_IMAGE}
           - docker push ${LATEST_IMAGE}
+          - *export_fingerprint_env_var
 
 
     - step: &merkely_log_docker_image
@@ -46,7 +47,6 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_fingerprint_env_var
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
