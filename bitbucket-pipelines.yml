@@ -3,15 +3,15 @@ image: atlassian/default-image:2
 
 
 definitions:
-  export_image_name_env_vars: &export_image_name_env_vars |
-    export LATEST_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
-    export TAGGED_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
+  set_image_env_vars: &set_image_env_vars |
+    export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
+    export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
 
-  export_fingerprint_env_var: &export_fingerprint_env_var |
-    export TAGGED_IMAGE="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
-    docker pull ${TAGGED_IMAGE}
-    export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${TAGGED_IMAGE} | cut -d ':' -f 2)
-    export MERKELY_FINGERPRINT="sha256://${SHA256}/${TAGGED_IMAGE}"
+  set_fingerprint_env_var: &set_fingerprint_env_var |
+    export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
+    docker pull ${IMAGE_TAGGED}
+    export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
+    export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
 
   steps:
 
@@ -33,13 +33,12 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_image_name_env_vars
-          - docker build --file ${PWD}/Dockerfile --tag ${TAGGED_IMAGE} ${PWD}
-          - docker tag ${TAGGED_IMAGE} ${LATEST_IMAGE}
+          - *set_image_env_vars
+          - docker build --file ${PWD}/Dockerfile --tag ${IMAGE_TAGGED} ${PWD}
+          - docker tag ${IMAGE_TAGGED} ${IMAGE_LATEST}
           - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
-          - docker push ${TAGGED_IMAGE}
-          - docker push ${LATEST_IMAGE}
-          - *export_fingerprint_env_var
+          - docker push ${IMAGE_TAGGED}
+          - docker push ${IMAGE_LATEST}
 
 
     - step: &merkely_log_docker_image
@@ -47,6 +46,7 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
+          - *set_fingerprint_env_var
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
             variables:
@@ -62,11 +62,11 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_fingerprint_env_var
+          - *set_fingerprint_env_var
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
-            ${TAGGED_IMAGE}
+            ${IMAGE_TAGGED}
           - mkdir -p build/test
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
@@ -87,13 +87,13 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_fingerprint_env_var
+          - *set_fingerprint_env_var
           - mkdir -p build/security
           - docker run
               --rm
               --volume ${PWD}/build:/code/build
               --entrypoint ./entrypoint-security.sh
-              ${TAGGED_IMAGE}
+              ${IMAGE_TAGGED}
           - # Log results in Merkely
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
@@ -111,13 +111,13 @@ definitions:
         services: [ docker ]
         caches: [ docker ]
         script:
-          - *export_fingerprint_env_var
+          - *set_fingerprint_env_var
           - mkdir -p build/coverage
           - docker run
               --entrypoint ./entrypoint-coverage.sh
               --rm
               --volume ${PWD}/build:/code/build
-              ${TAGGED_IMAGE}
+              ${IMAGE_TAGGED}
           - # Log results in Merkely
           - source build/coverage/coverage_summary.sh
           - docker pull merkely/change:latest
@@ -138,7 +138,7 @@ definitions:
         caches: [ docker ]
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
-          - *export_fingerprint_env_var
+          - *set_fingerprint_env_var
           - # Log deployment in Merkely
           - docker pull merkely/change:latest
           - pipe: docker://merkely/change:latest
