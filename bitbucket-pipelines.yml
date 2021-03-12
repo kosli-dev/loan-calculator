@@ -52,6 +52,7 @@ definitions:
               MERKELY_COMMAND: "log_artifact"
               MERKELY_FINGERPRINT: "sha256://${SHA256}/${TAGGED_IMAGE}"
               MERKELY_IS_COMPLIANT: "TRUE"
+              MERKELY_PIPE_PATH: "${PWD}/Merkelypipe.bitbucket.json"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
