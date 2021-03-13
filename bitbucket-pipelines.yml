@@ -1,9 +1,9 @@
 
-image: atlassian/default-image:2
-
 clone:
   depth: full
-  
+
+image: atlassian/default-image:2
+
 definitions:
 
   set_image_env_vars: &set_image_env_vars |
@@ -157,14 +157,18 @@ definitions:
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
+          - export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
           - # Log approval in Merkely
+          - pwd
+          - ls -al
+          - echo "${BITBUCKET_CLONE_DIR}"
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_approval"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
-              MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
-              MERKELY_DESCRIPTION: "Approval created in pipeline"
+              MERKELY_OLDEST_SRC_COMMITISH: origin/production
+              MERKELY_NEWEST_SRC_COMMITISH: HEAD
+              MERKELY_DESCRIPTION: "Production release approved by ${BITBUCKET_TRIGGERER_USERNAME}"
               MERKELY_IS_APPROVED: "TRUE"
               MERKELY_SRC_REPO_ROOT: "${PWD}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
