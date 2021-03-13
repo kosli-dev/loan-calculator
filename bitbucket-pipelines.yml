@@ -153,7 +153,6 @@ definitions:
     - step: &request_approval_for_deployment
         name: Request approval for deployment in Merkely
         services: [ docker ]
-        trigger: manual
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
@@ -165,7 +164,7 @@ definitions:
               MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
               MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
               MERKELY_DESCRIPTION: "Production release approved by ${BITBUCKET_TRIGGERER_USERNAME}"
-              MERKELY_IS_APPROVED: "TRUE"
+              MERKELY_IS_APPROVED: "FALSE"
               MERKELY_SRC_REPO_ROOT: "${PWD}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
@@ -174,6 +173,7 @@ definitions:
     - step: &deploy_to_production
         name: Deploy to Production
         services: [ docker ]
+        trigger: manual
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
@@ -194,7 +194,7 @@ definitions:
               MERKELY_ENVIRONMENT: "production"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
-              
+
           - git checkout --track origin/production
           - git merge ${BITBUCKET_COMMIT}
           - git push origin production
