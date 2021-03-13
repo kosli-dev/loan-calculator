@@ -1,7 +1,9 @@
 
 image: atlassian/default-image:2
 
-
+clone:
+  depth: full
+  
 definitions:
 
   set_image_env_vars: &set_image_env_vars |
