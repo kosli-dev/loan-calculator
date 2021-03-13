@@ -148,6 +148,50 @@ definitions:
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
+    - step: &approve_deployment
+        name: Approve deployment to production
+        services: [ docker ]
+        trigger: manual
+        script:
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
+          - # Log approval in Merkely
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "log_approval"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
+              MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
+              MERKELY_DESCRIPTION: "Approval created in pipeline"
+              MERKELY_IS_APPROVED: "TRUE"
+              MERKELY_SRC_REPO_ROOT: "${BITBUCKET_CLONE_DIR}"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+
+
+    - step: &deploy_to_production
+        name: Deploy to Production
+        services: [ docker ]
+        script:
+          - *set_merkely_fingerprint
+          - *set_merkely_pipe_path
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "control_deployment"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+          - echo YOUR DEPLOYMENT COMMAND HERE
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: "log_deployment"
+              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_DESCRIPTION: "Deployed to production in pipeline"
+              MERKELY_ENVIRONMENT: "production"
+              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
+              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+
+
 pipelines:
   default:
     - step: *merkely_declare_pipeline
@@ -157,3 +201,5 @@ pipelines:
     - step: *run_security_analysis
     - step: *run_coverage_analysis
     - step: *deploy_to_staging
+    - step: *approve_deployment
+    - step: *deploy_to_production
