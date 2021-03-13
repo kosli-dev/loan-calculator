@@ -155,8 +155,6 @@ definitions:
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
-          - pwd
-          - ls -al
           - # Log approval in Merkely
           - pipe: docker://merkely/change:latest
             variables:
@@ -166,7 +164,7 @@ definitions:
               MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
               MERKELY_DESCRIPTION: "Approval created in pipeline"
               MERKELY_IS_APPROVED: "TRUE"
-              MERKELY_SRC_REPO_ROOT: "${BITBUCKET_CLONE_DIR}"
+              MERKELY_SRC_REPO_ROOT: "${PWD}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
