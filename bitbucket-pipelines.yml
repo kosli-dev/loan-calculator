@@ -137,9 +137,9 @@ definitions:
         services: [ docker ]
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
+          - # Log deployment in Merkely
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
-          - # Log deployment in Merkely
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
@@ -156,14 +156,13 @@ definitions:
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
-          - export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_approval"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
               MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
-              MERKELY_DESCRIPTION: "Production release approved by ${BITBUCKET_TRIGGERER_USERNAME}"
+              MERKELY_DESCRIPTION: "Production release requested"
               MERKELY_IS_APPROVED: "FALSE"
               MERKELY_SRC_REPO_ROOT: "${PWD}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
