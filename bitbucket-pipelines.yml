@@ -6,17 +6,17 @@ image: atlassian/default-image:2
 
 definitions:
 
-  set_image_env_vars: &set_image_env_vars |
+  export_image_env_vars: &export_image_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
 
-  set_merkely_fingerprint: &set_merkely_fingerprint |
+  export_merkely_fingerprint_env_var: &export_merkely_fingerprint_env_var |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     docker pull ${IMAGE_TAGGED}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
 
-  set_merkely_pipe_path: &set_merkely_pipe_path |
+  export_merkely_pipe_path_env_var: &export_merkely_pipe_path_env_var |
     export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.bitbucket.json"
 
   steps:
@@ -25,7 +25,7 @@ definitions:
         name: Declare Merkely Pipeline
         services: [ docker ]
         script:
-          - *set_merkely_pipe_path
+          - *export_merkely_pipe_path_env_var
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "declare_pipeline"
@@ -37,7 +37,7 @@ definitions:
         name: Build and publish Docker image
         services: [ docker ]
         script:
-          - *set_image_env_vars
+          - *export_image_env_vars
           - docker build --file ${PWD}/Dockerfile --tag ${IMAGE_TAGGED} ${PWD}
           - docker tag ${IMAGE_TAGGED} ${IMAGE_LATEST}
           - echo ${DOCKERHUB_DEPLOY_TOKEN} | docker login --username ${DOCKERHUB_DEPLOY_USERNAME} --password-stdin
@@ -49,8 +49,8 @@ definitions:
         name: Log Docker image in Merkely
         services: [ docker ]
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_artifact"
@@ -64,8 +64,8 @@ definitions:
         name: Run units tests, log results in Merkely
         services: [ docker ]
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -88,8 +88,8 @@ definitions:
         name: Run security analysis, log results in Merkely
         services: [ docker ]
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - mkdir -p build/security
           - docker run
               --rm
@@ -111,8 +111,8 @@ definitions:
         name: Run coverage analysis, log results in Merkely
         services: [ docker ]
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - mkdir -p build/coverage
           - docker run
               --entrypoint ./entrypoint-coverage.sh
@@ -138,8 +138,8 @@ definitions:
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
           - # Log deployment in Merkely
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
@@ -154,8 +154,8 @@ definitions:
         name: Request approval for deployment in Merkely
         services: [ docker ]
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_approval"
@@ -174,8 +174,8 @@ definitions:
         services: [ docker ]
         trigger: manual
         script:
-          - *set_merkely_fingerprint
-          - *set_merkely_pipe_path
+          - *export_merkely_fingerprint_env_var
+          - *export_merkely_pipe_path_env_var
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "control_deployment"
