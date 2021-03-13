@@ -200,13 +200,19 @@ definitions:
 
 
 pipelines:
-  default:
-    - step: *merkely_declare_pipeline
-    - step: *build_and_publish_docker_image
-    - step: *merkely_log_docker_image
-    - step: *run_unit_tests
-    - step: *run_security_analysis
-    - step: *run_coverage_analysis
-    - step: *deploy_to_staging
-    - step: *request_approval_for_deployment
-    - step: *deploy_to_production
+  branches:
+    production:
+      - step:
+        script:
+          - echo "Do nothing for production, it is only a tracking branch"
+
+    master:
+      - step: *merkely_declare_pipeline
+      - step: *build_and_publish_docker_image
+      - step: *merkely_log_docker_image
+      - step: *run_unit_tests
+      - step: *run_security_analysis
+      - step: *run_coverage_analysis
+      - step: *deploy_to_staging
+      - step: *request_approval_for_deployment
+      - step: *deploy_to_production
