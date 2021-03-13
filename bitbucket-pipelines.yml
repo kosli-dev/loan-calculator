@@ -150,24 +150,20 @@ definitions:
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
-    - step: &approve_deployment
-        name: Approve deployment to production
+    - step: &request_approval_for_deployment
+        name: Request approval for deployment in Merkely
         services: [ docker ]
         trigger: manual
         script:
           - *set_merkely_fingerprint
           - *set_merkely_pipe_path
           - export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
-          - # Log approval in Merkely
-          - pwd
-          - ls -al
-          - echo "${BITBUCKET_CLONE_DIR}"
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_approval"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_OLDEST_SRC_COMMITISH: origin/production
-              MERKELY_NEWEST_SRC_COMMITISH: HEAD
+              MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
+              MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
               MERKELY_DESCRIPTION: "Production release approved by ${BITBUCKET_TRIGGERER_USERNAME}"
               MERKELY_IS_APPROVED: "TRUE"
               MERKELY_SRC_REPO_ROOT: "${PWD}"
@@ -187,7 +183,9 @@ definitions:
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+
           - echo YOUR DEPLOYMENT COMMAND HERE
+
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_deployment"
@@ -196,6 +194,10 @@ definitions:
               MERKELY_ENVIRONMENT: "production"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              
+          - git checkout --track origin/production
+          - git merge ${BITBUCKET_COMMIT}
+          - git push origin production
 
 
 pipelines:
@@ -207,5 +209,5 @@ pipelines:
     - step: *run_security_analysis
     - step: *run_coverage_analysis
     - step: *deploy_to_staging
-    - step: *approve_deployment
+    - step: *request_approval_for_deployment
     - step: *deploy_to_production
