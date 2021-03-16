@@ -21,11 +21,11 @@ jobs:
 
 
       - name: Declare Merkely Pipeline
-        run: |-
-          docker run --rm
-              --env MERKELY_COMMAND=declare_pipeline
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }}
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
+        run: |
+          docker run --rm \
+              --env MERKELY_COMMAND=declare_pipeline \
+              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
+              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
               merkely/change
 
 
