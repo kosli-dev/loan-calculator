@@ -25,7 +25,7 @@ jobs:
         env:
           MERKELY_COMMAND: declare_pipeline
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${PWD}/Merkelypipe.json
+          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
 
 
       - name: Build and Publish Docker Image
