@@ -53,7 +53,7 @@ jobs:
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
-              ${{ env.TAGGED_IMAGE }}
+              ${{ env.IMAGE_TAGGED }}
           mkdir -p build/test
           docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
