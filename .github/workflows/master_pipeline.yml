@@ -59,6 +59,8 @@ jobs:
           mkdir -p build/test
           docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
+          pwd
+          ls -al
 
 
       - name: Log unit test results in Merkely
