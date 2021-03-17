@@ -94,9 +94,9 @@ jobs:
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
-      - name: Run coverage and log results in Merkely
+      - name: Run coverage
         run: |
-          # Run coverage, write summary to build/coverage/coverage_summary.sh
+          # Write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage
           docker run \
                   --rm \
@@ -104,22 +104,19 @@ jobs:
                   --entrypoint ./entrypoint-coverage.sh \
                   ${{ env.TAGGED_IMAGE }}
           source build/coverage/coverage_summary.sh
+          echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
-          # Log coverage summary in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_evidence \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_EVIDENCE_TYPE=coverage \
-              --env MERKELY_IS_COMPLIANT=TRUE \
-              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}" \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              merkely/change
+
+      - name: Log coverage results in Merkely
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: log_evidence
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_EVIDENCE_TYPE: coverage
+          MERKELY_IS_COMPLIANT: "TRUE"
+          MERKELY_DESCRIPTION: ${{ env.COVERAGE_SUMMARY }}
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Deploy to staging
