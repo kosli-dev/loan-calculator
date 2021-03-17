@@ -30,11 +30,9 @@ jobs:
 
       - name: Build and Publish Docker Image
         run: |
-          docker build --file ${PWD}/Dockerfile --tag ${{ env.TAGGED_IMAGE }} ${PWD}
+          docker build --file ${PWD}/Dockerfile --tag ${{ env.IMAGE_TAGGED }} ${PWD}
           docker tag ${{ env.IMAGE_TAGGED }} ${{ env.IMAGE_LATEST }}
-
           echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
-
           docker push ${{ env.IMAGE_TAGGED }}
           docker push ${{ env.IMAGE_LATEST }}
 
@@ -49,7 +47,7 @@ jobs:
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
-      - name: Run unit tests
+      - name: Run Unit Tests
         run: |
           # Write results to ./build/test/
           docker run \
@@ -61,7 +59,7 @@ jobs:
           docker rm container
 
 
-      - name: Log unit test results in Merkely
+      - name: Log Unit Test Results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
@@ -72,7 +70,7 @@ jobs:
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
-      - name: Run security analysis
+      - name: Run Security Analysis
         run: |
           # Run bandit security. Write results to ./build/security/
           mkdir -p build/security
@@ -83,7 +81,7 @@ jobs:
                   ${{ env.TAGGED_IMAGE }}
 
 
-      - name: Log security results in Merkely
+      - name: Log Security Results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
@@ -94,7 +92,7 @@ jobs:
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
-      - name: Run coverage
+      - name: Run Coverage
         run: |
           # Write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage
@@ -107,7 +105,7 @@ jobs:
           echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
 
-      - name: Log coverage results in Merkely
+      - name: Log Coverage Results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_evidence
@@ -121,11 +119,10 @@ jobs:
 
       - name: Deploy to staging
         run: |
-          # Deploy to staging
           echo YOUR DEPLOYMENT COMMAND HERE
 
 
-      - name: Log deployment to staging in Merkely
+      - name: Log Deployment to staging in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_deployment
