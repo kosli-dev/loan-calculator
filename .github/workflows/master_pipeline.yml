@@ -25,7 +25,7 @@ jobs:
         env:
           MERKELY_COMMAND: declare_pipeline
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${GITHUB_WORKSPACE}/Merkelypipe.json
 
 
       - name: Build and Publish Docker Image
@@ -46,18 +46,18 @@ jobs:
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${GITHUB_WORKSPACE}/Merkelypipe.json
 
 
       - name: Run unit tests
         run: |
-          # Run the units tests. Writes results to build/test/pytest_unit.xml
+          # Run the units tests. Write results to ./build/test/pytest_unit.xml
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
               ${{ env.TAGGED_IMAGE }}
           mkdir -p build/test
-          docker cp container:/code/build/test/ ${PWD}/build
+          docker cp container:/code/build/test/ ${GITHUB_WORKSPACE}/build
           docker rm container
 
 
@@ -67,9 +67,9 @@ jobs:
           MERKELY_COMMAND: log_test
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: unit_test
-          MERKELY_TEST_RESULTS_DIR: /github/workspace/build/test
+          MERKELY_TEST_RESULTS_DIR: ${GITHUB_WORKSPACE}/build/test
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${GITHUB_WORKSPACE}/Merkelypipe.json
 
 
       - name: Run security analysis and log results in Merkely
