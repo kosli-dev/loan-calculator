@@ -57,7 +57,7 @@ jobs:
               --entrypoint ./entrypoint-unit_test.sh \
               ${{ env.TAGGED_IMAGE }}
           mkdir -p build/test
-          docker cp container:/code/build/test/ /github/workspace/build
+          docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
 
 
@@ -92,7 +92,7 @@ jobs:
           MERKELY_TEST_RESULTS_DIR: /github/workspace/build/security
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
-          
+
 
       - name: Run coverage and log results in Merkely
         run: |
