@@ -19,9 +19,9 @@ jobs:
         ref: ${{ github.event.inputs.deploy_commit }}
 
 
-    - name: Make Docker image name available for following step
+    - name: Make Docker image name available for following steps
       run: |
-        echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+        echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
     - name: Request Approval in Merkely
@@ -30,7 +30,7 @@ jobs:
 
         docker run \
             --env MERKELY_COMMAND=log_approval \
-            --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
+            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
             --env MERKELY_OLDEST_SRC_COMMITISH=origin/production \
             --env MERKELY_NEWEST_SRC_COMMITISH=${{ github.event.inputs.deploy_commit }} \
             --env MERKELY_DESCRIPTION="Approval created by ${GITHUB_ACTOR} on github" \

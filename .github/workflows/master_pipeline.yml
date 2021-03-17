@@ -16,8 +16,8 @@ jobs:
 
       - name: Make Docker image names available for following steps
         run: |
-          echo "LATEST_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
-          echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+          echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+          echo "IMAGE_LATEST=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
 
 
       - name: Declare Merkely Pipeline
@@ -35,15 +35,15 @@ jobs:
 
           echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
 
-          docker push ${{ env.TAGGED_IMAGE }}
-          docker push ${{ env.LATEST_IMAGE }}
+          docker push ${{ env.IMAGE_TAGGED }}
+          docker push ${{ env.IMAGE_LATEST }}
 
 
       - name: Log Docker Image in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_artifact
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
@@ -65,7 +65,7 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -87,7 +87,7 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: security
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace }}/build/security
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -111,7 +111,7 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_evidence
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: coverage
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_DESCRIPTION: ${{ env.COVERAGE_SUMMARY }}
@@ -129,7 +129,7 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_deployment
-          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
           MERKELY_ENVIRONMENT: staging
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
