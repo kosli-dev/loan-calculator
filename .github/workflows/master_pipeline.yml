@@ -49,7 +49,7 @@ jobs:
           MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
 
 
-      - name: Run unit tests and log results in Merkely
+      - name: Run unit tests
         run: |
           # Run the units tests. Writes results to build/test/pytest_unit.xml
           docker run \
@@ -62,22 +62,14 @@ jobs:
 
 
       - name: Log unit test results in Merkely
+        uses: docker://merkely/change:latest
         env:
-          TEST_RESULTS_PATH: build/test/pytest_unit.xml
-        run: |
-          docker run \
-              --env MERKELY_COMMAND=log_test \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_EVIDENCE_TYPE=unit_test \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume ${PWD}/${TEST_RESULTS_PATH}:/data/junit/junit.xml \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              merkely/change
+          MERKELY_COMMAND: log_test
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_EVIDENCE_TYPE: unit_test
+          MERKELY_TEST_RESULTS_DIR: ${PWD}/build/test/pytest_unit.xml
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
 
 
       - name: Run security analysis and log results in Merkely
