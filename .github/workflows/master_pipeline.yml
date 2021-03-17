@@ -59,9 +59,13 @@ jobs:
           mkdir -p build/test
           docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
+
+      - name: See if pytest_unit.xml is visible
+        run: |
           pwd
           ls -al
-
+          cd build/test
+          ls -al
 
       - name: Log unit test results in Merkely
         uses: docker://merkely/change:latest
