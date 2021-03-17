@@ -67,7 +67,7 @@ jobs:
           MERKELY_COMMAND: log_test
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: unit_test
-          MERKELY_TEST_RESULTS_DIR: ${PWD}/build/test/pytest_unit.xml
+          MERKELY_TEST_RESULTS_DIR: /github/workspace/build/test/pytest_unit.xml
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
 
