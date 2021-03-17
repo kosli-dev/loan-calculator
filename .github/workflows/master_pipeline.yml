@@ -67,9 +67,9 @@ jobs:
           MERKELY_COMMAND: log_test
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: unit_test
-          MERKELY_TEST_RESULTS_DIR: /github/workspace/build/test
+          MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run security analysis
