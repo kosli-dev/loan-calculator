@@ -50,10 +50,8 @@ jobs:
 
 
       - name: Run unit tests and log results in Merkely
-        env:
-          TEST_RESULTS_FILE: build/test/pytest_unit.xml
         run: |
-          # Run the units tests, write results to build/test/pytest_unit.xml
+          # Run the units tests. Writes results to build/test/pytest_unit.xml
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
@@ -62,7 +60,11 @@ jobs:
           docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
 
-          # Log test results in Merkely
+
+      - name: Log unit test results in Merkely
+        env:
+          TEST_RESULTS_PATH: build/test/pytest_unit.xml
+        run: |
           docker run \
               --env MERKELY_COMMAND=log_test \
               --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
@@ -72,7 +74,7 @@ jobs:
               --env GITHUB_REPOSITORY \
               --env GITHUB_RUN_ID \
               --rm \
-              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
+              --volume ${PWD}/${TEST_RESULTS_PATH}:/data/junit/junit.xml \
               --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
               --volume /var/run/docker.sock:/var/run/docker.sock \
               merkely/change
