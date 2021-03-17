@@ -25,7 +25,7 @@ jobs:
         env:
           MERKELY_COMMAND: declare_pipeline
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Build and Publish Docker Image
@@ -46,12 +46,12 @@ jobs:
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run unit tests
         run: |
-          # Write results to ./build/test/pytest_unit.xml
+          # Write results to ./build/test/
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
@@ -89,9 +89,9 @@ jobs:
           MERKELY_COMMAND: log_test
           MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
           MERKELY_EVIDENCE_TYPE: security
-          MERKELY_TEST_RESULTS_DIR: /github/workspace/build/security
+          MERKELY_TEST_RESULTS_DIR: $${ github.workspace }}/build/security
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: /github/workspace/Merkelypipe.json
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run coverage and log results in Merkely
@@ -122,22 +122,18 @@ jobs:
               merkely/change
 
 
-      - name: Deploy to staging and log deployment in Merkely
+      - name: Deploy to staging
         run: |
           # Deploy to staging
           echo YOUR DEPLOYMENT COMMAND HERE
 
-          # Log deployment to staging in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_deployment \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_DESCRIPTION="Deployed to staging in pipeline" \
-              --env MERKELY_ENVIRONMENT=staging \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              merkely/change
+
+      - name: Log deployment to staging in Merkely
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: log_deployment
+          MERKELY_FINGERPRINT: docker://${{ env.TAGGED_IMAGE }}
+          MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
+          MERKELY_ENVIRONMENT: staging
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
