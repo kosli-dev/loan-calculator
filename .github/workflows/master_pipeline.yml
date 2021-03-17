@@ -78,7 +78,7 @@ jobs:
                   --rm \
                   --volume ${PWD}/build:/code/build \
                   --entrypoint ./entrypoint-security.sh \
-                  ${{ env.TAGGED_IMAGE }}
+                  ${{ env.IMAGE_TAGGED }}
 
 
       - name: Log Security Results in Merkely
@@ -100,7 +100,7 @@ jobs:
                   --rm \
                   --volume ${PWD}/build:/code/build \
                   --entrypoint ./entrypoint-coverage.sh \
-                  ${{ env.TAGGED_IMAGE }}
+                  ${{ env.IMAGE_TAGGED }}
           source build/coverage/coverage_summary.sh
           echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
