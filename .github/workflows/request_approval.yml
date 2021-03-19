@@ -46,7 +46,6 @@ jobs:
             --rm \
             --volume=/var/run/docker.sock:/var/run/docker.sock \
             --volume ${PWD}:/src \
-            --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
             merkely/change
 
 

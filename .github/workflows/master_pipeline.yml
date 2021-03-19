@@ -78,7 +78,6 @@ jobs:
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run Security Analysis
@@ -102,7 +101,6 @@ jobs:
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run Coverage
@@ -129,7 +127,6 @@ jobs:
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Deploy to staging
@@ -147,4 +144,3 @@ jobs:
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
