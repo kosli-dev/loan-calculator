@@ -12,9 +12,7 @@ jobs:
 
     # This is a manually triggered workflow to deploy to production
     # Runs from production branch
-    # Do deploy
-    # Log deploy
-    # Merge with master
+    # Do deploy, Log deploy, Merge with master
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
@@ -23,17 +21,19 @@ jobs:
         fetch-depth: 0
         ref: ${{ github.event.inputs.deploy_commit }}
 
+
     - name: Make Docker image name available for following steps
       run: |
-        echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+        echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+
 
     - name: Deploy to production
       run: |
-        docker pull ${{ env.TAGGED_IMAGE }}
+        docker pull ${{ env.IMAGE_TAGGED }}
 
         docker run \
             --env MERKELY_COMMAND=control_deployment \
-            --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
+            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
             --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
             --rm \
             --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
@@ -44,7 +44,7 @@ jobs:
 
         docker run \
             --env MERKELY_COMMAND=log_deployment \
-            --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
+            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
             --env MERKELY_DESCRIPTION="Deployed to production in pipeline" \
             --env MERKELY_ENVIRONMENT=production \
             --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \

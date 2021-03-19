@@ -16,148 +16,118 @@ jobs:
 
       - name: Make Docker image names available for following steps
         run: |
-          echo "LATEST_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
-          echo "TAGGED_IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+          echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+          echo "IMAGE_LATEST=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
 
 
       - name: Declare Merkely Pipeline
-        run: >
-          docker run --rm
-              --env MERKELY_COMMAND=declare_pipeline
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }}
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json
-              merkely/change
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: declare_pipeline
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Build and Publish Docker Image
         run: |
-          docker build --file ${PWD}/Dockerfile --tag ${{ env.TAGGED_IMAGE }} ${PWD}
-          docker tag ${{ env.TAGGED_IMAGE }} ${{ env.LATEST_IMAGE }}
-
+          docker build --file ${PWD}/Dockerfile --tag ${{ env.IMAGE_TAGGED }} ${PWD}
+          docker tag ${{ env.IMAGE_TAGGED }} ${{ env.IMAGE_LATEST }}
           echo ${{ secrets.DOCKERHUB_DEPLOY_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }} --password-stdin
-
-          docker push ${{ env.TAGGED_IMAGE }}
-          docker push ${{ env.LATEST_IMAGE }}
+          docker push ${{ env.IMAGE_TAGGED }}
+          docker push ${{ env.IMAGE_LATEST }}
 
 
       - name: Log Docker Image in Merkely
-        run: |
-          docker run \
-              --env MERKELY_COMMAND=log_artifact \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_IS_COMPLIANT=TRUE \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_SHA \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              merkely/change
-
-
-      - name: Run unit tests and log results in Merkely
+        uses: docker://merkely/change:latest
         env:
-          TEST_RESULTS_FILE: build/test/pytest_unit.xml
+          MERKELY_COMMAND: log_artifact
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+          MERKELY_IS_COMPLIANT: "TRUE"
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
+
+
+      - name: Run Unit Tests
         run: |
-          # Run the units tests, write results to build/test/pytest_unit.xml
+          # Write results to ./build/test/
           docker run \
               --name container \
               --entrypoint ./entrypoint-unit_test.sh \
-              ${{ env.TAGGED_IMAGE }}
+              ${{ env.IMAGE_TAGGED }}
           mkdir -p build/test
           docker cp container:/code/build/test/ ${PWD}/build
           docker rm container
 
-          # Log test results in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_test \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_EVIDENCE_TYPE=unit_test \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume ${PWD}/${TEST_RESULTS_FILE}:/data/junit/junit.xml \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              merkely/change
 
-
-      - name: Run security analysis and log results in Merkely
+      - name: Log Unit Test Results in Merkely
+        uses: docker://merkely/change:latest
         env:
-          SECURITY_RESULTS_FILE: build/security/security.xml
+          MERKELY_COMMAND: log_test
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+          MERKELY_EVIDENCE_TYPE: unit_test
+          MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
+
+
+      - name: Run Security Analysis
         run: |
-          # Run the bandit security, write results directly to build/security/security.xml
+          # Run bandit security. Write results to ./build/security/
           mkdir -p build/security
           docker run \
                   --rm \
                   --volume ${PWD}/build:/code/build \
                   --entrypoint ./entrypoint-security.sh \
-                  ${{ env.TAGGED_IMAGE }}
-
-          # Log security results in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_test \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_EVIDENCE_TYPE=security \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume ${PWD}/${SECURITY_RESULTS_FILE}:/data/junit/junit.xml \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              merkely/change
+                  ${{ env.IMAGE_TAGGED }}
 
 
-      - name: Run coverage and log results in Merkely
+      - name: Log Security Results in Merkely
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: log_test
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+          MERKELY_EVIDENCE_TYPE: security
+          MERKELY_TEST_RESULTS_DIR: ${{ github.workspace }}/build/security
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
+
+
+      - name: Run Coverage
         run: |
-          # Run coverage, write summary to build/coverage/coverage_summary.sh
+          # Write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage
           docker run \
                   --rm \
                   --volume ${PWD}/build:/code/build \
                   --entrypoint ./entrypoint-coverage.sh \
-                  ${{ env.TAGGED_IMAGE }}
+                  ${{ env.IMAGE_TAGGED }}
           source build/coverage/coverage_summary.sh
-
-          # Log coverage summary in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_evidence \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_EVIDENCE_TYPE=coverage \
-              --env MERKELY_IS_COMPLIANT=TRUE \
-              --env MERKELY_DESCRIPTION="${COVERAGE_SUMMARY}" \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              merkely/change
+          echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
 
-      - name: Deploy to staging and log deployment in Merkely
+      - name: Log Coverage Results in Merkely
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: log_evidence
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+          MERKELY_EVIDENCE_TYPE: coverage
+          MERKELY_IS_COMPLIANT: "TRUE"
+          MERKELY_DESCRIPTION: ${{ env.COVERAGE_SUMMARY }}
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
+
+
+      - name: Deploy to staging
         run: |
-          # Deploy to staging
           echo YOUR DEPLOYMENT COMMAND HERE
 
-          # Log deployment to staging in Merkely
-          docker run \
-              --env MERKELY_COMMAND=log_deployment \
-              --env MERKELY_FINGERPRINT=docker://${{ env.TAGGED_IMAGE }} \
-              --env MERKELY_DESCRIPTION="Deployed to staging in pipeline" \
-              --env MERKELY_ENVIRONMENT=staging \
-              --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-              --env GITHUB_SERVER_URL \
-              --env GITHUB_REPOSITORY \
-              --env GITHUB_RUN_ID \
-              --rm \
-              --volume /var/run/docker.sock:/var/run/docker.sock \
-              --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
-              merkely/change
+
+      - name: Log Deployment to staging in Merkely
+        uses: docker://merkely/change:latest
+        env:
+          MERKELY_COMMAND: log_deployment
+          MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+          MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
+          MERKELY_ENVIRONMENT: staging
+          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
