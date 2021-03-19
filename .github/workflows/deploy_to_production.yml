@@ -22,13 +22,9 @@ jobs:
         ref: ${{ github.event.inputs.deploy_commit }}
 
 
-    - name: Add MERKELY_OWNER and MERKELY_PIPELINE to GITHUB_ENV
+    - name: Add MERKELY_OWNER, MERKELY_PIPELINE, and Docker image name to GITHUB_ENV
       run: |
         cat ./Merkely.env >> ${GITHUB_ENV}
-
-
-    - name: Make Docker image name available for following steps
-      run: |
         echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
