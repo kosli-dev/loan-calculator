@@ -74,7 +74,7 @@ jobs:
           MERKELY_COMMAND: log_test
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: unit_test
-          MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
+          MERKELY_TEST_RESULTS_DIR: ${{ github.workspace }}/build/test
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
