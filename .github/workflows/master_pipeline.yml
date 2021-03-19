@@ -14,9 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+
       - name: Add MERKELY_OWNER and MERKELY_PIPELINE to GITHUB_ENV
         run: |
-          cat .github/merkely.env >> ${GITHUB_ENV}
+          cat ./merkely.env >> ${GITHUB_ENV}
 
 
       - name: Make Docker image names available for following steps
@@ -53,7 +54,6 @@ jobs:
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
       - name: Run Unit Tests
@@ -75,8 +75,8 @@ jobs:
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
-          MERKELY_OWNER: ${{ secrets.MERKELY_OWNER }}
-          MERKELY_PIPELINE: ${{ secrets.MERKELY_PIPELINE }}
+          MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
@@ -99,8 +99,8 @@ jobs:
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: security
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace }}/build/security
-          MERKELY_OWNER: ${{ secrets.MERKELY_OWNER }}
-          MERKELY_PIPELINE: ${{ secrets.MERKELY_PIPELINE }}
+          MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
@@ -126,8 +126,8 @@ jobs:
           MERKELY_EVIDENCE_TYPE: coverage
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_DESCRIPTION: ${{ env.COVERAGE_SUMMARY }}
-          MERKELY_OWNER: ${{ secrets.MERKELY_OWNER }}
-          MERKELY_PIPELINE: ${{ secrets.MERKELY_PIPELINE }}
+          MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
@@ -144,7 +144,7 @@ jobs:
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
           MERKELY_ENVIRONMENT: staging
-          MERKELY_OWNER: ${{ secrets.MERKELY_OWNER }}
-          MERKELY_PIPELINE: ${{ secrets.MERKELY_PIPELINE }}
+          MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
