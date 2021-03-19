@@ -21,7 +21,7 @@ jobs:
 
     - name: Add MERKELY_OWNER and MERKELY_PIPELINE to GITHUB_ENV
       run: |
-        cat ./merkely.env >> ${GITHUB_ENV}
+        cat ./Merkely.env >> ${GITHUB_ENV}
 
 
     - name: Make Docker image name available for following steps
