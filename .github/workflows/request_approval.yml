@@ -29,6 +29,11 @@ jobs:
         echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
+    - name: Pull the Docker image so its digest can be determined
+      run: |
+        docker pull ${{ env.IMAGE_TAGGED }}
+
+
     - name: Request Approval in Merkely
       run: |
         docker run \
