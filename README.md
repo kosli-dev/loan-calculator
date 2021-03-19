@@ -7,8 +7,8 @@ This repository provides a demo project for getting started with the [Merkely De
 Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
 1. Fork this repo so you can follow along.
-2. Change the `owner` in [the Merkleypipe pipeline definition](Merkelypipe.json#L3) to the name of your user or team in the Merkely platform.
-3. Also, change the values for `description` and `name` in [Merkelypipe.json](Merkelypipe.json). Name should not contain whitespace.
+2. Change `MERKELY_OWNER` in [Merkley.env](Merkely.env#L1) to the name of your user or team in the Merkely platform.
+3. Change `MERKELY_PIPELINE` in [Merkley.env](Merkely.env#L2) to the name of your pipeline in the Merkely platform. Name should not contain whitespace.
 4. Add the secrets below in your github repository settings.
 
 | SECRET NAME | NOTES |
@@ -49,7 +49,7 @@ In addition, we have these manually triggered ci pipeline:
 2. Check deployments are blocked without approval.
    * Run the `Deploy to Production` workflow.  It should fail because the artifact is not approved for deployment.
    * Run the `Create approval in Merkely` workflow.  It will create an approval in Merkely.
-   * You can see this in the `Approvals` tab in your pipeline.  Go ahead an approve it in Merkely's UI.
+   * You can see this in the `Approvals` tab in your pipeline.  Go ahead and approve it in Merkely's UI.
    * Re-run the `Deploy to Production` workflow. This time it should succeed.
 
 3. Extra-credit: Smuggling in security failures
