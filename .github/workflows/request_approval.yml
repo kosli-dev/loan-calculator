@@ -35,21 +35,18 @@ jobs:
 
 
     - name: Request Approval in Merkely
-      run: |
-        docker run \
-            --env MERKELY_COMMAND=log_approval \
-            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
-            --env MERKELY_OLDEST_SRC_COMMITISH=origin/production \
-            --env MERKELY_NEWEST_SRC_COMMITISH=${{ github.event.inputs.deploy_commit }} \
-            --env MERKELY_DESCRIPTION="Approval created by ${GITHUB_ACTOR} on github" \
-            --env MERKELY_IS_APPROVED=TRUE \
-            --env MERKELY_OWNER=${{ env.MERKELY_OWNER }} \
-            --env MERKELY_PIPELINE=${{ env.MERKELY_PIPELINE }} \
-            --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-            --rm \
-            --volume=/var/run/docker.sock:/var/run/docker.sock \
-            --volume ${PWD}:/src \
-            merkely/change
+      uses: docker://merkely/change:latest
+      env:
+        MERKELY_COMMAND: log_approval
+        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+        MERKELY_OLDEST_SRC_COMMITISH: origin/production
+        MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
+        MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
+        MERKELY_SRC_REPO_ROOT: ${PWD}
+        MERKELY_IS_APPROVED: "TRUE"
+        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
+        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
 
 
 
