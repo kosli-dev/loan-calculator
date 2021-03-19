@@ -16,12 +16,12 @@ jobs:
 
       - name: Make Merkely owner available for following steps
         run: |
-          echo "MERKELY_OWNER=compliancedbb
+          echo "MERKELY_OWNER=compliancedbb" >> ${GITHUB_ENV}
 
 
       - name: Make name of Merkely pipeline available for following steps
         run: |
-          echo "MERKELY_PIPELINE=loancalculator
+          echo "MERKELY_PIPELINE=loancalculator" >> ${GITHUB_ENV}
 
 
       - name: Make Docker image names available for following steps
