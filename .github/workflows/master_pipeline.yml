@@ -14,6 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Make Merkely owner available for following steps
+        run: |
+          echo "MERKELY_OWNER=compliancedbb
+
+
+      - name: Make name of Merkely pipeline available for following steps
+        run: |
+          echo "MERKELY_PIPELINE=loancalculator
+
+
       - name: Make Docker image names available for following steps
         run: |
           echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
@@ -24,6 +34,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: declare_pipeline
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
@@ -41,6 +53,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_artifact
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_IS_COMPLIANT: "TRUE"
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
@@ -63,6 +77,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: unit_test
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace}}/build/test
@@ -85,6 +101,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: security
           MERKELY_TEST_RESULTS_DIR: ${{ github.workspace }}/build/security
@@ -109,6 +127,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_evidence
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_EVIDENCE_TYPE: coverage
           MERKELY_IS_COMPLIANT: "TRUE"
@@ -126,6 +146,8 @@ jobs:
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_deployment
+          MERKELY_OWNER: $${ env.MERKELY_OWNER }}
+          MERKELY_PIPELINE: $${ env.MERKELY_PIPELINE }}
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
           MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
           MERKELY_ENVIRONMENT: staging
