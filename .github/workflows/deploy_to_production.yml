@@ -34,8 +34,8 @@ jobs:
         docker run \
             --env MERKELY_COMMAND=control_deployment \
             --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
-            --env MERKELY_OWNER=$${ secrets.MERKELY_OWNER }} \
-            --env MERKELY_PIPELINE=$${ secrets.MERKELY_PIPELINE }} \
+            --env MERKELY_OWNER=${{ secrets.MERKELY_OWNER }} \
+            --env MERKELY_PIPELINE=${{ secrets.MERKELY_PIPELINE }} \
             --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
             --rm \
             --volume ${PWD}/Merkelypipe.json:/data/Merkelypipe.json \
@@ -49,8 +49,8 @@ jobs:
             --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
             --env MERKELY_DESCRIPTION="Deployed to production in pipeline" \
             --env MERKELY_ENVIRONMENT=production \
-            --env MERKELY_OWNER=$${ secrets.MERKELY_OWNER }} \
-            --env MERKELY_PIPELINE=$${ secrets.MERKELY_PIPELINE }} \
+            --env MERKELY_OWNER=${{ secrets.MERKELY_OWNER }} \
+            --env MERKELY_PIPELINE=${{ secrets.MERKELY_PIPELINE }} \
             --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
             --env GITHUB_SERVER_URL \
             --env GITHUB_REPOSITORY \
