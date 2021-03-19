@@ -20,13 +20,13 @@ jobs:
           cat ./Merkely.env >> ${GITHUB_ENV}
 
 
-      - name: Make Docker image names available for following steps
+      - name: Add Docker image names to GITHUB_ENV
         run: |
           echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
           echo "IMAGE_LATEST=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
 
 
-      - name: Declare Merkely Pipeline
+      - name: Declare Merkely pipeline
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: declare_pipeline
@@ -36,7 +36,7 @@ jobs:
           MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
 
 
-      - name: Build and Publish Docker Image
+      - name: Build and publish Docker image
         run: |
           docker build --file ${PWD}/Dockerfile --tag ${{ env.IMAGE_TAGGED }} ${PWD}
           docker tag ${{ env.IMAGE_TAGGED }} ${{ env.IMAGE_LATEST }}
@@ -45,7 +45,7 @@ jobs:
           docker push ${{ env.IMAGE_LATEST }}
 
 
-      - name: Log Docker Image in Merkely
+      - name: Log Docker image in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_artifact
@@ -56,7 +56,7 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
 
 
-      - name: Run Unit Tests
+      - name: Run unit tests
         run: |
           # Write results to ./build/test/
           docker run \
@@ -68,7 +68,7 @@ jobs:
           docker rm container
 
 
-      - name: Log Unit Test Results in Merkely
+      - name: Log unit test results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
@@ -80,7 +80,7 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
 
 
-      - name: Run Security Analysis
+      - name: Run security analysis
         run: |
           # Run bandit security. Write results to ./build/security/
           mkdir -p build/security
@@ -91,7 +91,7 @@ jobs:
                   ${{ env.IMAGE_TAGGED }}
 
 
-      - name: Log Security Results in Merkely
+      - name: Log security results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_test
@@ -103,7 +103,7 @@ jobs:
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
 
 
-      - name: Run Coverage
+      - name: Run coverage
         run: |
           # Write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage
@@ -116,7 +116,7 @@ jobs:
           echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
 
-      - name: Log Coverage Results in Merkely
+      - name: Log coverage results in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_evidence
@@ -134,7 +134,7 @@ jobs:
           echo YOUR DEPLOYMENT COMMAND HERE
 
 
-      - name: Log Deployment to staging in Merkely
+      - name: Log deployment to staging in Merkely
         uses: docker://merkely/change:latest
         env:
           MERKELY_COMMAND: log_deployment

@@ -27,42 +27,45 @@ jobs:
         cat ./Merkely.env >> ${GITHUB_ENV}
 
 
-    - name: Make Docker image name available for following steps
+    - name: Add Docker image name to GITHUB_ENV
       run: |
         echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
 
 
-    - name: Deploy to production
+    - name: Pull the Docker image so Merkely can get its digest
       run: |
         docker pull ${{ env.IMAGE_TAGGED }}
 
-        docker run \
-            --env MERKELY_COMMAND=control_deployment \
-            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
-            --env MERKELY_OWNER=${{ env.MERKELY_OWNER }} \
-            --env MERKELY_PIPELINE=${{ env.MERKELY_PIPELINE }} \
-            --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-            --rm \
-            --volume /var/run/docker.sock:/var/run/docker.sock \
-            merkely/change
 
+    - name: Short-circuit deployment unless approved for release
+      uses: docker://merkely/change:latest
+      env:
+        MERKELY_COMMAND: control_deployment
+        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
+        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+
+
+    - name: Deploy to production
+      run: |
         echo YOUR DEPLOYMENT COMMAND HERE
 
-        docker run \
-            --env MERKELY_COMMAND=log_deployment \
-            --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
-            --env MERKELY_DESCRIPTION="Deployed to production in pipeline" \
-            --env MERKELY_ENVIRONMENT=production \
-            --env MERKELY_OWNER=${{ env.MERKELY_OWNER }} \
-            --env MERKELY_PIPELINE=${{ env.MERKELY_PIPELINE }} \
-            --env MERKELY_API_TOKEN=${{ secrets.MERKELY_API_TOKEN }} \
-            --env GITHUB_SERVER_URL \
-            --env GITHUB_REPOSITORY \
-            --env GITHUB_RUN_ID \
-            --rm \
-            --volume=/var/run/docker.sock:/var/run/docker.sock \
-            merkely/change
 
+    - name: Log deployment to production in Merkely
+      uses: docker://merkely/change:latest
+      env:
+        MERKELY_COMMAND: log_deployment
+        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
+        MERKELY_DESCRIPTION: "Deployed to production in pipeline"
+        MERKELY_ENVIRONMENT: production
+        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
+        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
+        MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+
+
+    - name: Update tracking branch
+      run: |
         git checkout --track origin/production
         git merge ${{ github.event.inputs.deploy_commit }}
         git push origin production
