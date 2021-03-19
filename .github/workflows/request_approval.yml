@@ -27,8 +27,6 @@ jobs:
 
     - name: Request Approval in Merkely
       run: |
-        docker pull ${{ env.IMAGE_TAGGED }}
-
         docker run \
             --env MERKELY_COMMAND=log_approval \
             --env MERKELY_FINGERPRINT=docker://${{ env.IMAGE_TAGGED }} \
