@@ -31,7 +31,7 @@ jobs:
 
     - name: Request Approval in Merkely
       run: |
-        docker pull ${{ env.TAGGED_IMAGE }}
+        docker pull ${{ env.IMAGE_TAGGED }}
 
         docker run \
             --env MERKELY_COMMAND=log_approval \
