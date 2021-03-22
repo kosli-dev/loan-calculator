@@ -84,10 +84,11 @@ definitions:
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_test"
+              MERKELY_OWNER: "${MERKELY_OWNER}"
+              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_EVIDENCE_TYPE: "unit_test"
               MERKELY_TEST_RESULTS_DIR: "${PWD}/build/test/"
-              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
