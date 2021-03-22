@@ -24,7 +24,7 @@ jobs:
 
     - name: Add MERKELY_OWNER and MERKELY_PIPELINE to GITHUB_ENV
       run: |
-        cat ./Merkely.env >> ${GITHUB_ENV}
+        cat ./env-files/github.env >> ${GITHUB_ENV}
 
 
     - name: Add Docker image name to GITHUB_ENV

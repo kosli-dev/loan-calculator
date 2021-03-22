@@ -7,9 +7,9 @@ This repository provides a demo project for getting started with the [Merkely De
 Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
 1. Fork this repo so you can follow along.
-2. Change `MERKELY_OWNER` in [Merkely.env](Merkely.env#L1) to the name of your user or team in the Merkely platform.
+2. Change `MERKELY_OWNER` in [env-files/github.env](env-files/github.env#L1) to the name of your user or team in the Merkely platform.
 3. Choose a name for your Merkely pipeline. The name must not contain whitespace.   
-4. Change `MERKELY_PIPELINE` in [Merkely.env](Merkely.env#L2) to the name of your pipeline. 
+4. Change `MERKELY_PIPELINE` in [env-files/github.env](env-files/github.env#L2) to the name of your pipeline. 
 5. Add the secrets below in your github repository settings.
 
 | SECRET NAME | NOTES |
