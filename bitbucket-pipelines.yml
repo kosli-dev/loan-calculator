@@ -17,8 +17,8 @@ definitions:
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
 
   export_merkely_env_vars: &export_merkely_env_vars
-    export $(cat ${PWD}/Merkelypipe.json)
-    export MERKELY_PIPE_PATH="${PWD}/Merkely.env"
+    export $(cat ${PWD}/Merkely.env)
+    export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.json"
 
   export_merkely_pipe_path_env_var: &export_merkely_pipe_path_env_var |
     export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.bitbucket.json"
