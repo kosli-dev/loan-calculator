@@ -15,11 +15,9 @@ and then in the step:
             --env MERKELY_FINGERPRINT=sha256://${SHA256}/${TAGGED_IMAGE}
 
 
-
 The Merkelypipe.json file for bitbucket is
 Merkelypipe.bitbucket.json
 This must be volume-mounted to /data/Merkelypipe.json
-
 
 
 Bitbucket has ways of creating reusable yml.
