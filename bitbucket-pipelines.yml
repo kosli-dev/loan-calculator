@@ -208,11 +208,6 @@ definitions:
 
 pipelines:
   branches:
-    production:
-      - step:
-        script:
-          - echo "Do nothing for production, it is only a tracking branch"
-
     master:
       - step: *merkely_declare_pipeline
       - step: *build_and_publish_docker_image
