@@ -16,6 +16,10 @@ definitions:
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
 
+  export_merkely_env_vars: &export_merkely_env_vars
+    export $(cat ${PWD}/Merkelypipe.json)
+    export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.json"
+
   export_merkely_pipe_path_env_var: &export_merkely_pipe_path_env_var |
     export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.bitbucket.json"
 
@@ -25,10 +29,12 @@ definitions:
         name: Declare Merkely Pipeline
         services: [ docker ]
         script:
-          - *export_merkely_pipe_path_env_var
+          - *export_merkely_env_vars
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "declare_pipeline"
+              MERKELY_OWNER: "${MERKELY_OWNER}"
+              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
               MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
@@ -50,13 +56,14 @@ definitions:
         services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_var
-          - *export_merkely_pipe_path_env_var
+          - *export_merkely_env_vars
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_artifact"
+              MERKELY_OWNER: "${MERKELY_OWNER}"
+              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
               MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
               MERKELY_IS_COMPLIANT: "TRUE"
-              MERKELY_PIPE_PATH: "${MERKELY_PIPE_PATH}"
               MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
 
 
