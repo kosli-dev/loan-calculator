@@ -1,4 +1,4 @@
-name: Request approval in Merkely
+name: 2/3 Request approval in Merkely
 on:
   workflow_dispatch:
     inputs:
