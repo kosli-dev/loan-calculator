@@ -41,7 +41,7 @@ jobs:
         MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
         MERKELY_OLDEST_SRC_COMMITISH: origin/production
         MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
-        MERKELY_DESCRIPTION: "Approval created by ${GITHUB_ACTOR} on github"
+        MERKELY_DESCRIPTION: "Approval created by ${{ github.actor }} on github"
         MERKELY_SRC_REPO_ROOT: ${{ github.workspace }}
         MERKELY_IS_APPROVED: "TRUE"
         MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
