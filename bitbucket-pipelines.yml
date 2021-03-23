@@ -12,7 +12,7 @@ definitions:
 
   export_merkely_fingerprint_env_vars: &export_merkely_fingerprint_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
-    docker pull ${IMAGE_TAGGED}
+    # docker pull ${IMAGE_TAGGED}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
     export $(cat ${PWD}/env-files/bitbucket.env)
@@ -40,6 +40,7 @@ definitions:
     - step: &build_and_publish_docker_image
         name: Build and publish Docker image
         services: [ docker ]
+        caches: [ docker ]
         script:
           - *export_image_env_vars
           - docker build --file ${PWD}/Dockerfile --tag ${IMAGE_TAGGED} ${PWD}
