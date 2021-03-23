@@ -142,7 +142,7 @@ definitions:
           - echo YOUR DEPLOYMENT COMMAND HERE
 
     - step: &merkely_log_deployment_to_staging
-        name: Log deploymnet to staging in Merkely
+        name: Log deployment to staging in Merkely
         services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
