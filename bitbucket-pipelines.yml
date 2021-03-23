@@ -65,10 +65,10 @@ definitions:
 
 
     - step: &run_unit_tests
-        name: Run units tests, log results in Merkely
+        name: Run units tests
         services: [ docker ]
         script:
-          - *export_merkely_fingerprint_env_vars
+          - *export_image_env_vars
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -76,7 +76,13 @@ definitions:
           - mkdir -p build/test
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
-          - # Log results in Merkely
+
+
+    - step: &merkely_log_unit_test_results
+        name: Log unit test results in Merkely
+        services: [ docker ]
+        script:
+          - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: "log_test"
@@ -140,6 +146,7 @@ definitions:
         name: Deploy to staging
         script:
           - echo YOUR DEPLOYMENT COMMAND HERE
+
 
     - step: &merkely_log_deployment_to_staging
         name: Log deployment to staging in Merkely
@@ -228,6 +235,7 @@ pipelines:
       - step: *build_and_publish_docker_image
       - step: *merkely_log_docker_image
       - step: *run_unit_tests
+      - step: *merkely_log_unit_test_results
       - step: *run_security_analysis
       - step: *run_coverage_analysis
       - step: *deploy_to_staging
