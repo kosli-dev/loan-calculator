@@ -69,6 +69,7 @@ definitions:
         services: [ docker ]
         script:
           - *export_image_env_vars
+          - pwd
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -77,7 +78,7 @@ definitions:
           - docker cp container:/code/build/test/ ${PWD}/build
           - docker rm container
         artifacts:
-          - ${PWD}/build/test/**
+          - build/test/**
 
 
     - step: &merkely_log_unit_test_results
@@ -85,6 +86,7 @@ definitions:
         services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
+          - pwd
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: log_test
