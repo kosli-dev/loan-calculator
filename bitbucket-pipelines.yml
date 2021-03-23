@@ -194,7 +194,7 @@ definitions:
               MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
               MERKELY_NEWEST_SRC_COMMITISH: ${BITBUCKET_COMMIT}
               MERKELY_DESCRIPTION: "Production release requested"
-              MERKELY_IS_APPROVED: "FALSE"
+              MERKELY_IS_APPROVED: "TRUE"
               MERKELY_SRC_REPO_ROOT: ${PWD}
               MERKELY_OWNER: ${MERKELY_OWNER}
               MERKELY_PIPELINE: ${MERKELY_PIPELINE}
