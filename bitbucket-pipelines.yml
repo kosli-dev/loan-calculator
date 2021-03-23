@@ -69,7 +69,6 @@ definitions:
         services: [ docker ]
         script:
           - *export_image_env_vars
-          - pwd
           - docker run
             --name container
             --entrypoint ./entrypoint-unit_test.sh
@@ -86,64 +85,79 @@ definitions:
         services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
-          - pwd
           - pipe: docker://merkely/change:latest
             variables:
               MERKELY_COMMAND: log_test
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_EVIDENCE_TYPE: "unit_test"
-              MERKELY_TEST_RESULTS_DIR: "${PWD}/build/test/"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
+              MERKELY_EVIDENCE_TYPE: unit_test
+              MERKELY_TEST_RESULTS_DIR: ${PWD}/build/test/
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
-    - step: &run_security_analysis
-        name: Run security analysis, log results in Merkely
+    - step: &run_security_tests
+        name: Run security tests
         services: [ docker ]
         script:
-          - *export_merkely_fingerprint_env_vars
+          - *export_image_env_vars
           - mkdir -p build/security
           - docker run
               --rm
               --volume ${PWD}/build:/code/build
               --entrypoint ./entrypoint-security.sh
               ${IMAGE_TAGGED}
-          - # Log results in Merkely
-          - pipe: docker://merkely/change:latest
-            variables:
-              MERKELY_COMMAND: "log_test"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_EVIDENCE_TYPE: "security"
-              MERKELY_TEST_RESULTS_DIR: "${PWD}/build/security/"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+        artifacts:
+          - build/security/**
 
 
-    - step: &run_coverage_analysis
-        name: Run coverage analysis, log results in Merkely
+    - step: &merkely_log_security_test_results
+        name: Log security test results in Merkely
         services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
+          - pipe: docker://merkely/change:latest
+            variables:
+              MERKELY_COMMAND: log_test
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
+              MERKELY_EVIDENCE_TYPE: security
+              MERKELY_TEST_RESULTS_DIR: ${PWD}/build/security/
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
+
+
+    - step: &run_coverage_analysis
+        name: Run coverage analysis
+        services: [ docker ]
+        script:
+          - *export_image_env_vars
           - mkdir -p build/coverage
           - docker run
               --entrypoint ./entrypoint-coverage.sh
               --rm
               --volume ${PWD}/build:/code/build
               ${IMAGE_TAGGED}
-          - # Log results in Merkely
+        artifacts:
+          - build/coverage/**
+
+
+    - step: &merkely_log_coverage_analysis
+        name: Log coverage analysis results in Merkely
+        services: [ docker ]
+        script:
           - source build/coverage/coverage_summary.sh
+          - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: "log_evidence"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_EVIDENCE_TYPE: "coverage"
+              MERKELY_COMMAND: log_evidence
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
+              MERKELY_EVIDENCE_TYPE: coverage
               MERKELY_IS_COMPLIANT: "TRUE"
-              MERKELY_DESCRIPTION: "${COVERAGE_SUMMARY}"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_DESCRIPTION: ${COVERAGE_SUMMARY}
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
     - step: &deploy_to_staging
@@ -159,13 +173,13 @@ definitions:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: "log_deployment"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_COMMAND: log_deployment
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
               MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
-              MERKELY_ENVIRONMENT: "staging"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_ENVIRONMENT: staging
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
     - step: &merkely_request_approval_for_deployment
@@ -175,16 +189,16 @@ definitions:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: "log_approval"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_COMMAND: log_approval
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
               MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
-              MERKELY_NEWEST_SRC_COMMITISH: "${BITBUCKET_COMMIT}"
+              MERKELY_NEWEST_SRC_COMMITISH: ${BITBUCKET_COMMIT}
               MERKELY_DESCRIPTION: "Production release requested"
               MERKELY_IS_APPROVED: "FALSE"
-              MERKELY_SRC_REPO_ROOT: "${PWD}"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_SRC_REPO_ROOT: ${PWD}
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
     - step: &merkely_check_deployment_approved
@@ -195,11 +209,11 @@ definitions:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: "control_deployment"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_COMMAND: control_deployment
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
     - step: &deploy_to_production
@@ -215,13 +229,13 @@ definitions:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: "log_deployment"
-              MERKELY_FINGERPRINT: "${MERKELY_FINGERPRINT}"
+              MERKELY_COMMAND: log_deployment
+              MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
               MERKELY_DESCRIPTION: "Deployed to production in pipeline"
-              MERKELY_ENVIRONMENT: "production"
-              MERKELY_OWNER: "${MERKELY_OWNER}"
-              MERKELY_PIPELINE: "${MERKELY_PIPELINE}"
-              MERKELY_API_TOKEN: "${MERKELY_API_TOKEN}"
+              MERKELY_ENVIRONMENT: production
+              MERKELY_OWNER: ${MERKELY_OWNER}
+              MERKELY_PIPELINE: ${MERKELY_PIPELINE}
+              MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
     - step: &update_tracking_branch
@@ -240,8 +254,10 @@ pipelines:
       - step: *merkely_log_docker_image
       - step: *run_unit_tests
       - step: *merkely_log_unit_test_results
-      - step: *run_security_analysis
+      - step: *run_security_tests
+      - step: *merkely_log_security_test_results
       - step: *run_coverage_analysis
+      - step: *merkely_log_coverage_analysis
       - step: *deploy_to_staging
       - step: *merkely_log_deployment_to_staging
       - step: *merkely_request_approval_for_deployment
