@@ -67,6 +67,8 @@ definitions:
     - step: &run_unit_tests
         name: Run units tests
         services: [ docker ]
+        artifacts:
+          - ${PWD}/build/test/**
         script:
           - *export_image_env_vars
           - docker run
