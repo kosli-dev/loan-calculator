@@ -139,7 +139,7 @@ jobs:
         env:
           MERKELY_COMMAND: log_deployment
           MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
-          MERKELY_DESCRIPTION: "Deployed to staging in pipeline"
+          MERKELY_DESCRIPTION: "Deployed to staging in github pipeline"
           MERKELY_ENVIRONMENT: staging
           MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
           MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
