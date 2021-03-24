@@ -5,10 +5,7 @@ clone:
 image: atlassian/default-image:2
 
 definitions:
-  services:
-    docker:
-      memory: 5120
-
+  
   export_image_env_vars: &export_image_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
     export IMAGE_LATEST="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-latest"
@@ -28,6 +25,7 @@ definitions:
 
     - step: &merkely_declare_pipeline
         name: Declare Merkely Pipeline
+        services: [ docker ]
         script:
           - *export_merkely_pipeline_env_vars
           - pipe: docker://merkely/change:latest
