@@ -5,6 +5,9 @@ clone:
 image: atlassian/default-image:2
 
 definitions:
+  services:
+    docker:
+      memory: 2148
 
   export_image_env_vars: &export_image_env_vars |
     export IMAGE_TAGGED="${DOCKERHUB_REPO_OWNER}/loancalculator:bitbucket-$(git log -1 --pretty=%h)"
@@ -25,7 +28,6 @@ definitions:
 
     - step: &merkely_declare_pipeline
         name: Declare Merkely Pipeline
-        services: [ docker ]
         script:
           - *export_merkely_pipeline_env_vars
           - pipe: docker://merkely/change:latest
@@ -39,7 +41,6 @@ definitions:
 
     - step: &build_and_publish_docker_image
         name: Build and publish Docker image
-        services: [ docker ]
         script:
           - *export_image_env_vars
           - docker build --file ${PWD}/Dockerfile --tag ${IMAGE_TAGGED} ${PWD}
@@ -51,7 +52,6 @@ definitions:
 
     - step: &merkely_log_docker_image
         name: Log Docker image in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
@@ -66,7 +66,6 @@ definitions:
 
     - step: &run_unit_tests
         name: Run units tests
-        services: [ docker ]
         script:
           - *export_image_env_vars
           - docker run
@@ -82,7 +81,6 @@ definitions:
 
     - step: &merkely_log_unit_test_results
         name: Log unit test results in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
@@ -98,7 +96,6 @@ definitions:
 
     - step: &run_security_tests
         name: Run security tests
-        services: [ docker ]
         script:
           - *export_image_env_vars
           - mkdir -p build/security
@@ -113,7 +110,6 @@ definitions:
 
     - step: &merkely_log_security_test_results
         name: Log security test results in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
@@ -129,7 +125,6 @@ definitions:
 
     - step: &run_coverage_analysis
         name: Run coverage analysis
-        services: [ docker ]
         script:
           - *export_image_env_vars
           - mkdir -p build/coverage
@@ -144,7 +139,6 @@ definitions:
 
     - step: &merkely_log_coverage_analysis
         name: Log coverage analysis results in Merkely
-        services: [ docker ]
         script:
           - source build/coverage/coverage_summary.sh
           - *export_merkely_fingerprint_env_vars
@@ -168,7 +162,6 @@ definitions:
 
     - step: &merkely_log_deployment_to_staging
         name: Log deployment to staging in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
@@ -184,7 +177,6 @@ definitions:
 
     - step: &merkely_request_approval_for_deployment
         name: Request approval for deployment in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
@@ -203,7 +195,6 @@ definitions:
 
     - step: &merkely_check_deployment_approved
         name: Check deployment to Production approved in Merkely
-        services: [ docker ]
         trigger: manual
         script:
           - *export_merkely_fingerprint_env_vars
@@ -224,7 +215,6 @@ definitions:
 
     - step: &merkely_log_deployment_to_production
         name: Log deploy to Production in Merkely
-        services: [ docker ]
         script:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
