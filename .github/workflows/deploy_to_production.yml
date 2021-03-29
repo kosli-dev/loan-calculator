@@ -57,7 +57,7 @@ jobs:
       env:
         MERKELY_COMMAND: log_deployment
         MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
-        MERKELY_DESCRIPTION: "Deployed to production in pipeline"
+        MERKELY_DESCRIPTION: "Deployed to production in github pipeline"
         MERKELY_ENVIRONMENT: production
         MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
         MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
