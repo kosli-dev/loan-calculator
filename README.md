@@ -39,7 +39,7 @@ There is a [master pipeline](.github/workflows/master_pipeline.yml) following th
 * Deploy to STAGE and log deployment to Merkely
 
 In addition, we have these manually triggered ci pipeline:
-* [Create Approval](.github/workflows/create_approval.yml)
+* [Request Approval](.github/workflows/request_approval.yml)
 * [Deploy to Production](.github/workflows/deploy_to_production.yml)
 
 
