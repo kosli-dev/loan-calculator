@@ -37,13 +37,12 @@ jobs:
     - name: Request approval in Merkely
       uses: docker://merkely/change:latest
       env:
-        MERKELY_COMMAND: log_approval
+        MERKELY_COMMAND: request_approval
         MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
         MERKELY_OLDEST_SRC_COMMITISH: origin/production
         MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
         MERKELY_DESCRIPTION: "Approval requested by ${{ github.actor }} in github pipeline"
         MERKELY_SRC_REPO_ROOT: ${{ github.workspace }}
-        MERKELY_IS_APPROVED: "TRUE"
         MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
         MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
