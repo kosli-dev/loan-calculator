@@ -2,7 +2,7 @@
 
 This repository provides a demo project for getting started with the [Merkely DevOps Change Management Platform](https://app.compliancedb.com).
 
-# Getting started
+# Getting started with Github Actions
 
 Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
@@ -29,7 +29,7 @@ For example:
 
 You will notice that this project comes with a CI/CD implementation using github actions.
 
-There is a [master pipeline](blob/master/.github/workflows/master_pipeline.yml) following these steps:
+There is a [master pipeline](.github/workflows/master_pipeline.yml) following these steps:
 
 * Build and Publish Docker Image
 * Declare Merkely Pipeline
@@ -39,8 +39,8 @@ There is a [master pipeline](blob/master/.github/workflows/master_pipeline.yml) 
 * Deploy to STAGE and log deployment to Merkely
 
 In addition, we have these manually triggered ci pipeline:
-* [Create Approval](blob/master/.github/workflows/create_approval.yml)
-* [Deploy to Production](blob/master/.github/workflows/deploy_to_production.yml)
+* [Create Approval](.github/workflows/create_approval.yml)
+* [Deploy to Production](.github/workflows/deploy_to_production.yml)
 
 
 # Things to try
