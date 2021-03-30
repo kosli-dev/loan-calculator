@@ -22,7 +22,7 @@ Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
 For example:
 
-![secrets](images/secrets.png)
+![secrets](docs/images/secrets.png)
 
 
 # The pipelines
