@@ -1,6 +1,6 @@
 # Loan Calculator Demo
 
-This repository provides a demo project for getting started with the [Merkely DevOps Change Management Platform](https://app.compliancedb.com).
+This repository provides a demo project for getting started with the [Merkely DevOps Change Management Platform](https://app.merkely.com).
 
 # Getting started with Github Actions
 
@@ -14,7 +14,7 @@ Pre-requisites: You will need an account on Merkely, Dockerhub and Github.
 
 | SECRET NAME | NOTES |
 | ----------- | ----- |
-| `MERKELY_API_TOKEN` | Your Merkely api token is in [your profile page](https://app.compliancedb.com/settings/profile). |
+| `MERKELY_API_TOKEN` | Your Merkely api token is in [your profile page](https://app.merkely.com/settings/profile). |
 | `DOCKERHUB_DEPLOY_USERNAME` | Your dockerhub username |
 | `DOCKERHUB_REPO_OWNER` | Your repository owner in dockerhub, typically the same as `DOCKERHUB_DEPLOY_USERNAME` |
 | `DOCKERHUB_DEPLOY_TOKEN` | For deploying your docker image, you will need to create a [personal access token](https://docs.docker.com/docker-hub/access-tokens/) |
@@ -59,5 +59,5 @@ In addition, we have these manually triggered ci pipeline:
 
 # Useful links
 
-* [Merkely Login Page](https://app.compliancedb.com/)
+* [Merkely Login Page](https://app.merkely.com/)
 * [Merkely Documentation](https://docs.merkely.com/)
