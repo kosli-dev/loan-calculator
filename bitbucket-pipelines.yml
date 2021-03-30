@@ -189,12 +189,11 @@ definitions:
           - *export_merkely_fingerprint_env_vars
           - pipe: docker://merkely/change:latest
             variables:
-              MERKELY_COMMAND: log_approval
+              MERKELY_COMMAND: request_approval
               MERKELY_FINGERPRINT: ${MERKELY_FINGERPRINT}
               MERKELY_OLDEST_SRC_COMMITISH: "origin/production"
               MERKELY_NEWEST_SRC_COMMITISH: ${BITBUCKET_COMMIT}
               MERKELY_DESCRIPTION: "Production release requested from bitbucket pipeline"
-              MERKELY_IS_APPROVED: "TRUE"
               MERKELY_SRC_REPO_ROOT: ${PWD}
               MERKELY_OWNER: ${MERKELY_OWNER}
               MERKELY_PIPELINE: ${MERKELY_PIPELINE}
@@ -202,7 +201,7 @@ definitions:
 
 
     - step: &merkely-check-deployment-approved
-        name: Check deployment to Production approved in Merkely
+        name: Trigger when deployment approved in Merkely
         services: [ docker ]
         trigger: manual
         script:
@@ -214,6 +213,9 @@ definitions:
               MERKELY_OWNER: ${MERKELY_OWNER}
               MERKELY_PIPELINE: ${MERKELY_PIPELINE}
               MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
+
+
+    # TODO: Add control_deployment command
 
 
     - step: &deploy-to-production
