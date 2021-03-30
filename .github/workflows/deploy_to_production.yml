@@ -67,7 +67,7 @@ jobs:
     - name: Update tracking branch
       run: |
         git checkout --track origin/production
-        git merge ${{ github.event.inputs.deploy_commit }}
+        git merge --ff-only ${{ github.event.inputs.deploy_commit }}
         git push origin production
 
 
