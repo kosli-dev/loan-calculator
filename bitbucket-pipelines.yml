@@ -215,9 +215,6 @@ definitions:
               MERKELY_API_TOKEN: ${MERKELY_API_TOKEN}
 
 
-    # TODO: Add control_deployment command
-
-
     - step: &deploy-to-production
         name: Deploy to Production
         script:
