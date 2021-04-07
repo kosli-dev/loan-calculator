@@ -5,7 +5,7 @@ on:
       deploy_commit:
         description: 'Git commit-ish to approve'
         required: true
-        default: 'master'
+        default: 'main'
 
 jobs:
   request_approval_in_merkely:

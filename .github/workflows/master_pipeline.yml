@@ -1,8 +1,8 @@
-name: 1/3 Master Pipeline
+name: 1/3 Main Pipeline
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:

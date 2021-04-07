@@ -5,14 +5,14 @@ on:
       deploy_commit:
         description: 'Git commit-ish to deploy'
         required: true
-        default: 'master'
+        default: 'main'
 
 jobs:
   production_deploy:
 
     # This is a manually triggered workflow to deploy to production
     # Runs from production branch
-    # Do deploy, Log deploy, Merge with master
+    # Do deploy, Log deploy, Merge with main branch
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
