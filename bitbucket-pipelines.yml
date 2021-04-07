@@ -247,7 +247,7 @@ definitions:
 
 pipelines:
   branches:
-    master:
+    main:
       - step: *merkely-declare-pipeline
       - step: *build-and-publish-docker-image
       - step: *merkely-log-docker-image
