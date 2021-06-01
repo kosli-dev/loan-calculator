@@ -7,6 +7,12 @@ on:
         required: true
         default: 'main'
 
+
+env:
+  MERKELY_OWNER: compliancedb
+  MERKELY_PIPELINE: loancalculator
+
+
 jobs:
   request_approval_in_merkely:
 
@@ -17,11 +23,6 @@ jobs:
         # fetch full history
         fetch-depth: 0
         ref: ${{ github.event.inputs.deploy_commit }}
-
-
-    - name: Add MERKELY_OWNER and MERKELY_PIPELINE to GITHUB_ENV
-      run: |
-        cat ./env-files/github.env >> ${GITHUB_ENV}
 
 
     - name: Add Docker image name to GITHUB_ENV
