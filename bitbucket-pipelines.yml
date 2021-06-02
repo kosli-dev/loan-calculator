@@ -15,11 +15,13 @@ definitions:
     docker pull ${IMAGE_TAGGED}
     export SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_TAGGED} | cut -d ':' -f 2)
     export MERKELY_FINGERPRINT="sha256://${SHA256}/${IMAGE_TAGGED}"
-    export $(cat ${PWD}/env-files/bitbucket.env)
+    export MERKELY_OWNER=compliancedb
+    export MERKELY_PIPELINE=bitbucket-loancalculator
 
   export_merkely_pipeline_env_vars: &export_merkely_pipeline_env_vars
+    export MERKELY_OWNER=compliancedb
+    export MERKELY_PIPELINE=bitbucket-loancalculator
     export MERKELY_PIPE_PATH="${PWD}/Merkelypipe.json"
-    export $(cat ${PWD}/env-files/bitbucket.env)
 
   steps:
 
