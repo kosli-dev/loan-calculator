@@ -6,6 +6,7 @@
     "template": [
         "artifact",
         "unit_test",
+        "security",
         "coverage"
     ]
 }
