@@ -2,7 +2,7 @@
     "owner": "compliancedb",
     "name": "loancalculator",
     "description": "The loan calculator application",
-    "visibility": "private",
+    "visibility": "public",
     "template": [
         "artifact",
         "unit_test",
