@@ -9,6 +9,7 @@ env:
   MERKELY_OWNER: compliancedb
   MERKELY_PIPELINE: loancalculator
   MERKELY_CLI_VERSION: "1.1.0"
+  IMAGE_NAME: merkely/loancalculator
 
 jobs:
   build:
@@ -20,11 +21,10 @@ jobs:
       
       - name: Add Docker image names to GITHUB_ENV
         run: |
-          echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
-          echo "IMAGE_LATEST=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
-          echo "IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
+          echo "IMAGE_TAGGED=${{ env.IMAGE_NAME }}:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+          echo "IMAGE_LATEST=${{ env.IMAGE_NAME }}:latest" >> ${GITHUB_ENV}
 
-      - name: Download merkely cli client
+      - name: Download Merkely cli client
         id: download-merkely-cli
         run: |
           wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
@@ -58,8 +58,8 @@ jobs:
         with:
           push: true
           tags: ${{ env.IMAGE_TAGGED }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             COMMIT_SHA=${{ github.sha }}
 
@@ -69,7 +69,6 @@ jobs:
         run: |
           ARTIFACT_SHA=$( echo ${{ steps.docker_build.outputs.digest }} | sed 's/.*://')
           echo "DIGEST=$ARTIFACT_SHA" >> ${GITHUB_ENV}
-          echo ::set-output name=image-digest::${ARTIFACT_SHA}
 
 
       - name: Log Docker image in Merkely
