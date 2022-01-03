@@ -8,6 +8,7 @@ on:
 env:
   MERKELY_OWNER: compliancedb
   MERKELY_PIPELINE: loancalculator
+  MERKELY_CLI_VERSION: "1.1.0"
 
 jobs:
   build:
@@ -23,14 +24,21 @@ jobs:
           echo "IMAGE_LATEST=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:latest" >> ${GITHUB_ENV}
 
 
+      - name: Download merkely cli client
+          id: download-merkely-cli
+          run: |
+            wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+            tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+
+
       - name: Declare Merkely pipeline
-        uses: docker://merkely/change:latest
         env:
-          MERKELY_COMMAND: declare_pipeline
-          MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
-          MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
           MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
-          MERKELY_PIPE_PATH: ${{ github.workspace }}/Merkelypipe.json
+        run:
+          ./merkely pipeline declare --pipeline ${{ env.MERKELY_PIPELINE }}
+            --description "The loan calculator application"
+            --template "artifact,unit_test,security,coverage"
+            --visibility public
 
 
       - name: Build and publish Docker image
