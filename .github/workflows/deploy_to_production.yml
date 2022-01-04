@@ -11,7 +11,8 @@ on:
 env:
   MERKELY_OWNER: compliancedb
   MERKELY_PIPELINE: loancalculator
-  
+  MERKELY_CLI_VERSION: "1.1.0"
+  IMAGE_NAME: merkely/loancalculator
 
 jobs:
   production_deploy:
@@ -30,7 +31,14 @@ jobs:
 
     - name: Add Docker image name to GITHUB_ENV
       run: |
-        echo "IMAGE_TAGGED=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+        echo "IMAGE_TAGGED=${{ env.IMAGE_NAME }}:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
+
+
+    - name: Download Merkely cli client
+      id: download-merkely-cli
+      run: |
+        wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+        tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
 
 
     - name: Pull the Docker image so Merkely can get its digest
@@ -39,13 +47,11 @@ jobs:
 
 
     - name: Short-circuit deployment unless approved for release
-      uses: docker://merkely/change:latest
       env:
-        MERKELY_COMMAND: control_deployment
-        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
-        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
-        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+      run:
+        ./merkely pipeline approval assert ${{ env.IMAGE_TAGGED }}
+          --artifact-type docker
 
 
     - name: Deploy to production
@@ -53,16 +59,13 @@ jobs:
         echo YOUR DEPLOYMENT COMMAND HERE
 
 
-    - name: Log deployment to production in Merkely
-      uses: docker://merkely/change:latest
+    - name: Report deployment to production in Merkely
       env:
-        MERKELY_COMMAND: log_deployment
-        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
-        MERKELY_DESCRIPTION: "Deployed to production in github pipeline"
-        MERKELY_ENVIRONMENT: production
-        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
-        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+      run:
+        ./merkely pipeline deployment report ${{ env.IMAGE_TAGGED }}
+          --artifact-type docker
+          --environment production
 
 
     - name: Update tracking branch
