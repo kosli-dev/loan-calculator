@@ -11,6 +11,8 @@ on:
 env:
   MERKELY_OWNER: compliancedb
   MERKELY_PIPELINE: loancalculator
+  MERKELY_CLI_VERSION: "1.1.0"
+  IMAGE_NAME: merkely/loancalculator
 
 
 jobs:
@@ -35,18 +37,23 @@ jobs:
         docker pull ${{ env.IMAGE_TAGGED }}
 
 
+    - name: Download Merkely cli client
+      id: download-merkely-cli
+      run: |
+        wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+        tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+
+
     - name: Request approval in Merkely
-      uses: docker://merkely/change:latest
       env:
-        MERKELY_COMMAND: request_approval
-        MERKELY_FINGERPRINT: docker://${{ env.IMAGE_TAGGED }}
-        MERKELY_OLDEST_SRC_COMMITISH: origin/production
-        MERKELY_NEWEST_SRC_COMMITISH: ${{ github.event.inputs.deploy_commit }}
-        MERKELY_DESCRIPTION: "Approval requested by ${{ github.actor }} in github pipeline"
-        MERKELY_SRC_REPO_ROOT: ${{ github.workspace }}
-        MERKELY_OWNER: ${{ env.MERKELY_OWNER }}
-        MERKELY_PIPELINE: ${{ env.MERKELY_PIPELINE }}
         MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+      run:
+        ./merkely pipeline approval request ${{ env.IMAGE_TAGGED }}
+          --artifact-type docker
+          --description "Approval requested by ${{ github.actor }} in github pipeline"
+          --oldest-commit origin/production
+          --newest-commit ${{ github.event.inputs.deploy_commit }}
+          --repo-root ${{ github.workspace }}
 
 
 
