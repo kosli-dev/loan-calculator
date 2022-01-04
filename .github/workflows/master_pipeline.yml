@@ -24,6 +24,7 @@ jobs:
           echo "IMAGE_TAGGED=${{ env.IMAGE_NAME }}:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
           echo "IMAGE_LATEST=${{ env.IMAGE_NAME }}:latest" >> ${GITHUB_ENV}
 
+
       - name: Download Merkely cli client
         id: download-merkely-cli
         run: |
