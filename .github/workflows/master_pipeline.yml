@@ -25,10 +25,10 @@ jobs:
           echo "IMAGE=${{ secrets.DOCKERHUB_REPO_OWNER }}/loancalculator" >> ${GITHUB_ENV}
 
       - name: Download merkely cli client
-          id: download-merkely-cli
-          run: |
-            wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
-            tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+        id: download-merkely-cli
+        run: |
+          wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+          tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
 
 
       - name: Declare Merkely pipeline
