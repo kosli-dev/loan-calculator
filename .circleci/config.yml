@@ -39,3 +39,12 @@ jobs:
               --jira-base-url https://kosli-test.atlassian.net \
               --jira-username jon@kosli.com \
               --name jira
+      - docker/check
+      - docker/build:
+          image: ${IMAGE_TAGGED}
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: ${IMAGE_TAGGED}
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
