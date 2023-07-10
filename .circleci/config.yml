@@ -37,3 +37,10 @@ jobs:
               --description "The loan calculator application" \
               --template "jira" \
               --visibility public
+      - run:
+          name: Report jira evidence
+          command: |
+            kosli report evidence commit jira \
+              --jira-base-url https://kosli-test.atlassian.net \
+              --jira-username jon@kosli.com \
+              --name jira
