@@ -1,8 +1,21 @@
-version: 2
+version: 2.1
+orbs:
+  docker: circleci/docker@2.2.0
+
+workflows:
+  build-and-publish-docker-image:
+    jobs:
+      - docker/publish:
+          image: merkely/loancalculator
+
 jobs:
   build:
     machine:
       image: ubuntu-2204:2023.04.2
+    environment:
+      KOSLI_ORG: kosli
+      KOSLI_FLOW: loancalculator
+      IMAGE_NAME: merkely/loancalculator
     steps: 
       - run:
           name: Install kosli-cli  
@@ -11,6 +24,5 @@ jobs:
             sudo apt install ca-certificates
             sudo apt update
             sudo apt install kosli
-      - run: kosli version
       - checkout
-
+      - run: echo "${KOSLI_ORG} / ${KOSLI_FLOW}"
