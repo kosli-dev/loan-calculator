@@ -28,7 +28,7 @@ jobs:
       - run:
           name: Create Kosli Flow
           command: |
-            kosli create flow \
+            kosli create flow ${KOSLI_FLOW} \
               --description "The loan calculator application" \
               --template "jira" \
               --visibility public
