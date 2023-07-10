@@ -35,7 +35,7 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./kosli create flow ${{ env.KOSLI_FLOW }}
+          kosli create flow ${{ env.KOSLI_FLOW }}
             --description "The loan calculator application"
             --template "artifact,unit_test,security,coverage"
             --visibility public
@@ -75,7 +75,7 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./kosli report artifact ${{ env.IMAGE_TAGGED }}
+          kosli report artifact ${{ env.IMAGE_TAGGED }}
 
 
       - name: Run unit tests
@@ -94,7 +94,7 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./kosli report evidence artifact junit
+          kosli report evidence artifact junit
             --name unit_test
             --results-dir "${{ github.workspace }}/build/test"
 
@@ -116,7 +116,7 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./kosli report evidence artifact generic
+          kosli report evidence artifact generic
             --description "${{ env.COVERAGE_SUMMARY }}"
             --name coverage
 
@@ -130,5 +130,5 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./kosli expect deployment
+          kosli expect deployment
             --environment staging
