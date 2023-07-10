@@ -3,12 +3,14 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:2023.04.2
-    steps:
-      - checkout
+    steps: 
       - run:
-          name: Do we have a git repo
+          name: Install kosli-cli  
           command: |
-            git status
-            git log --pretty=format:'' | wc -l
-            git rev-parse HEAD
-            git rev-parse HEAD~42
+            sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
+            apt install ca-certificates
+            apt update
+            apt install kosli
+      - run: kosli version
+      - checkout
+
