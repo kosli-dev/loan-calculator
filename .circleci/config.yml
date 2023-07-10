@@ -22,7 +22,9 @@ jobs:
       - run: 
           name: Set docker image tags
           command: |
-            echo "IMAGE_TAGGED=${IMAGE_NAME}:$(git log -1 --pretty=%h)" >> "${BASH_ENV}"
+            export IMAGE_TAG=$(git log -1 --pretty=%h)
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> "${BASH_ENV}"
+            echo "IMAGE_TAGGED=${IMAGE_NAME}:${IMAGE_TAG}" >> "${BASH_ENV}"
             echo "IMAGE_LATEST=${IMAGE_NAME}:latest" >> "${BASH_ENV}"
             source "${BASH_ENV}"
       - run:
@@ -41,10 +43,12 @@ jobs:
               --name jira
       - docker/check
       - docker/build:
-          image: ${IMAGE_TAGGED}
+          image: ${IMAGE_NAME}
+          tag: ${IMAGE_TAG}
       - docker/push:
           digest-path: /tmp/digest.txt
-          image: ${IMAGE_TAGGED}
+          image: ${IMAGE_NAME}
+          tag: ${IMAGE_TAG}
       - run:
           command: |
             echo "Digest is: $(</tmp/digest.txt)"
