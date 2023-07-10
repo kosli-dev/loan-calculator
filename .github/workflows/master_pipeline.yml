@@ -37,8 +37,19 @@ jobs:
         run:
           kosli create flow ${{ env.KOSLI_FLOW }}
             --description "The loan calculator application"
-            --template "artifact,unit_test,security,coverage"
+            --template "jira,artifact,unit_test,coverage"
             --visibility public
+
+
+      - name: Report jira ticket to kosli
+        env:
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+          KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
+        run:
+          kosli report evidence commit jira
+            --jira-base-url https://kosli-test.atlassian.net \
+            --jira-username jon@kosli.com \
+            --name jira
 
 
       - name: Set up Docker Buildx
