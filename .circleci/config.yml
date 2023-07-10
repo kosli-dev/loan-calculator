@@ -2,11 +2,11 @@ version: 2.1
 orbs:
   docker: circleci/docker@2.2.0
 
-workflows:
-  build-and-publish-docker-image:
-    jobs:
-      - docker/publish:
-          image: merkely/loancalculator
+# workflows:
+#   build-and-publish-docker-image:
+#     jobs:
+#       - docker/publish:
+#           image: merkely/loancalculator
 
 jobs:
   build:
