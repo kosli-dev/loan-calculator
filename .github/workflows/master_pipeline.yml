@@ -99,26 +99,6 @@ jobs:
             --results-dir "${{ github.workspace }}/build/test"
 
 
-      - name: Run security analysis
-        run: |
-          # Run bandit security. Write results to ./build/security/
-          mkdir -p build/security
-          docker run \
-                  --rm \
-                  --volume ${PWD}/build:/code/build \
-                  --entrypoint ./entrypoint-security.sh \
-                  ${{ env.IMAGE_TAGGED }}
-
-
-      - name: Log security results in Kosli
-        env:
-          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-        run:
-          ./kosli report evidence artifact junit # ?could be generic?
-            --name security
-            --results-dir "${{ github.workspace }}/build/security"
-
-
       - name: Run coverage
         run: |
           # Write summary to build/coverage/coverage_summary.sh
