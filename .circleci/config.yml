@@ -9,6 +9,5 @@ jobs:
           name: Do we have a git repo
           command: |
             git status
-            git log
             git rev-parse HEAD
             git rev-parse HEAD~42
