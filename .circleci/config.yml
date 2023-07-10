@@ -5,8 +5,7 @@ orbs:
 # workflows:
 #   build-and-publish-docker-image:
 #     jobs:
-#       - docker/publish:
-#           image: merkely/loancalculator
+
 
 jobs:
   build:
@@ -25,4 +24,16 @@ jobs:
             sudo apt update
             sudo apt install kosli
       - checkout
-      - run: echo "${KOSLI_ORG} / ${KOSLI_FLOW}"
+      - run: 
+          name: Set docker image tags
+          command: |
+            echo "IMAGE_TAGGED=${IMAGE_NAME}:$(git log -1 --pretty=%h)" >> "${BASH_ENV}"
+            echo "IMAGE_LATEST=${IMAGE_NAME}:latest" >> "${BASH_ENV}"
+            source "${BASH_ENV}"
+      - run:
+          name: Create Kosli Flow
+          command: |
+            kosli create flow ${KOSLI_FLOW} \
+              --description "The loan calculator application" \
+              --template "jira" \
+              --visibility public
