@@ -1,0 +1,109 @@
+version: 2
+jobs:
+  build-publish:
+    machine:
+      image: ubuntu-2004:202008-01
+    steps:
+      - checkout
+      - run:
+          name: Build tagged image, test it, publish it
+          command: |
+            # DOCKER_USER, DOCKER_PASS are in the context
+            echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+            ./build_test_publish.sh
+            docker logout
+
+  deploy-to-beta:
+    docker:
+      - image: cyberdojo/gcloud-kubectl-helm
+    steps:
+      - checkout
+      - run:
+          name: Authenticate with gcloud, deploy to beta with helm
+          command: ./.circleci/deploy_to_namespace.sh beta
+
+  deploy-to-prod:
+    docker:
+      - image: cyberdojo/gcloud-kubectl-helm
+    steps:
+      - checkout
+      - run:
+          name: Authenticate with gcloud, deploy to prod with helm
+          command: ./.circleci/deploy_to_namespace.sh prod
+
+  merkely-log-deployment-to-beta:
+    machine:
+      image: ubuntu-2004:202008-01
+    steps:
+      - checkout
+      - run:
+          name: Log deployment to beta in Merkely
+          command: ./.circleci/merkely_log_deployment.sh beta
+
+  merkely-log-deployment-to-prod:
+    machine:
+      image: ubuntu-2004:202008-01
+    steps:
+      - checkout
+      - run:
+          name: Log deployment to prod in Merkely
+          command: ./.circleci/merkely_log_deployment.sh prod
+
+
+  scrape-cluster:
+    docker:
+      - image: ghcr.io/merkely-development/reporter:latest
+    steps:
+      - checkout
+      - run:
+          name: Connect to K8S
+          command: ./.circleci/connect-to-k8s.sh
+      - run:
+          name: Scrape cluster production environment
+          command: reporter report env k8s production --owner cyber-dojo --namespace prod
+
+workflows:
+  version: 2
+  build-publish-deploy:
+    jobs:
+
+      - build-publish:
+          context: cyberdojo-context
+          filters:
+            branches:
+              only: [ master ]
+
+      - deploy-to-beta:
+          context: cyberdojo-context
+          requires: [ build-publish ]
+
+      - merkely-log-deployment-to-beta:
+          context: cyberdojo-context
+          requires: [ deploy-to-beta ]
+
+      - approve-to-prod:
+          type: approval
+          requires: [ deploy-to-beta ]
+
+      - deploy-to-prod:
+          context: cyberdojo-context
+          requires: [ approve-to-prod ]
+
+      - merkely-log-deployment-to-prod:
+          context: cyberdojo-context
+          requires: [ deploy-to-prod ]
+
+  every-hour:
+    triggers:
+      - schedule:
+          #cron: "0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57 * * * *"
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only: [ master ]
+    jobs:
+      - scrape-cluster:
+          context: cyberdojo-context
+          filters:
+            branches:
+              only: [ master ]
