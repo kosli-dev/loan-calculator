@@ -6,37 +6,36 @@ on:
   workflow_dispatch:
 
 env:
-  MERKELY_OWNER: compliancedb
-  MERKELY_PIPELINE: loancalculator
-  MERKELY_CLI_VERSION: "1.1.0"
+  KOSLI_ORG: kosli
+  KOSLI_FLOW: loancalculator
+  KOSLI_CLI_VERSION: "2.6.1"
   IMAGE_NAME: merkely/loancalculator
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
-
       
+
       - name: Add Docker image names to GITHUB_ENV
         run: |
           echo "IMAGE_TAGGED=${{ env.IMAGE_NAME }}:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
           echo "IMAGE_LATEST=${{ env.IMAGE_NAME }}:latest" >> ${GITHUB_ENV}
 
 
-      - name: Download Merkely cli client
-        id: download-merkely-cli
-        run: |
-          wget https://github.com/merkely-development/cli/releases/download/v${{ env.MERKELY_CLI_VERSION }}/merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
-          tar -xf merkely_${{ env.MERKELY_CLI_VERSION }}_linux_amd64.tar.gz
+      - name: Setup cli client
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ env.KOSLI_CLI_VERSION }}
 
 
-      - name: Declare Merkely pipeline
+      - name: Create Kosli flow
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline declare
+          ./kosli create flow ${{ env.KOSLI_FLOW }}
             --description "The loan calculator application"
             --template "artifact,unit_test,security,coverage"
             --visibility public
@@ -69,15 +68,14 @@ jobs:
         id: digest-prep
         run: |
           ARTIFACT_SHA=$( echo ${{ steps.docker_build.outputs.digest }} | sed 's/.*://')
-          echo "DIGEST=$ARTIFACT_SHA" >> ${GITHUB_ENV}
+          echo "KOSLI_FINGERPRINT=$ARTIFACT_SHA" >> ${GITHUB_ENV}
 
 
-      - name: Log Docker image in Merkely
+      - name: Log Docker image in Kosli
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline artifact report creation ${{ env.IMAGE_TAGGED }}
-            --sha256 ${{ env.DIGEST }}
+          ./kosli report artifact ${{ env.IMAGE_TAGGED }}
 
 
       - name: Run unit tests
@@ -92,14 +90,13 @@ jobs:
           docker rm container
 
 
-      - name: Log unit test results in Merkely
+      - name: Log unit test results in Kosli
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline artifact report evidence test ${{ env.IMAGE_TAGGED }}
-            --evidence-type unit_test
+          ./kosli report evidence artifact junit
+            --name unit_test
             --results-dir "${{ github.workspace }}/build/test"
-            --sha256 ${{ env.DIGEST }}
 
 
       - name: Run security analysis
@@ -113,14 +110,13 @@ jobs:
                   ${{ env.IMAGE_TAGGED }}
 
 
-      - name: Log security results in Merkely
+      - name: Log security results in Kosli
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline artifact report evidence test ${{ env.IMAGE_TAGGED }}
-            --evidence-type security
+          ./kosli report evidence artifact junit # ?could be generic?
+            --name security
             --results-dir "${{ github.workspace }}/build/security"
-            --sha256 ${{ env.DIGEST }}
 
 
       - name: Run coverage
@@ -136,14 +132,13 @@ jobs:
           echo "COVERAGE_SUMMARY=${COVERAGE_SUMMARY}" >> ${GITHUB_ENV}
 
 
-      - name: Log coverage results in Merkely
+      - name: Log coverage results in Kosli
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline artifact report evidence generic ${{ env.IMAGE_TAGGED }}
+          ./kosli report evidence artifact generic
             --description "${{ env.COVERAGE_SUMMARY }}"
-            --evidence-type coverage
-            --sha256 ${{ env.DIGEST }}
+            --name coverage
 
 
       - name: Deploy to staging
@@ -151,10 +146,9 @@ jobs:
           echo YOUR DEPLOYMENT COMMAND HERE
 
 
-      - name: Log deployment to staging in Merkely
+      - name: Log deployment to staging in Kosli
         env:
-          MERKELY_API_TOKEN: ${{ secrets.MERKELY_API_TOKEN }}
+          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
-          ./merkely pipeline deployment report ${{ env.IMAGE_TAGGED }}
+          ./kosli expect deployment
             --environment staging
-            --sha256 ${{ env.DIGEST }}
