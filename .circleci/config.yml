@@ -4,9 +4,10 @@ jobs:
     machine:
       image: ubuntu-2204:2023.04.2
     steps:
-      - checkout
-      - run:
-          name: Do we have a git repo
+      - uses: actions/checkout@v2
+
+      - name: Do we have a git repo
+        run:
           command: |
             git status
             git log --pretty=format:'' | wc -l
