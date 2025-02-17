@@ -1,0 +1,24 @@
+name: On Pull Request Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  on-merge:
+    name: Run on PR Merge
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == true }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run a script
+        env:
+          GITHUB_EVENT: ${{ toJSON(github.event) }}
+          GITHUB_ALL: ${{ toJSON(github) }}
+        run: |
+          echo "This job runs when a pull request is merged!"
+          echo $GITHUB_ALL | jq
+
