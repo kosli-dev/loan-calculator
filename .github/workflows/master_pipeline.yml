@@ -147,7 +147,7 @@ jobs:
 #            --environment staging
 
   jira-ticket-testing:
-    if: always()  # ${{ github.event_name }} == 'pull_request'
+    needs: [build]
     runs-on: ubuntu-22.04
 
     steps:
