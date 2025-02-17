@@ -154,12 +154,12 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Find out branch name
-        env:
-          GITHUB_EVENT: ${{ toJSON(github.event) }}
-          GITHUB_ALL: ${{ toJSON(github) }}
+#        env:
+#          GITHUB_EVENT: ${{ toJSON(github.event) }}
+#          GITHUB_ALL: ${{ toJSON(github) }}
         run: |
           set -x
-          git log --oneline --decorate --tags | head
+          git log --show-notes
           echo "github.event_name: ${{ github.event_name }}"
           echo "github.ref: ${{ github.ref }}"
           echo "github.event: ${{ github.event }}"
