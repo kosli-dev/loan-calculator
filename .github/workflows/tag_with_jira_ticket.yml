@@ -22,10 +22,10 @@ jobs:
           # more info: https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectandissuekeys
           JIRA_TAG=$(echo "$BRANCH" | grep -oE '[A-Z][A-Z0-9]{1,9}-[0-9]+')
           if [ -n "$JIRA_TAG" ]; then
-#            git config --global user.name "GitHub Actions"
-#            git config --global user.email "actions@github.com"
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
             echo "Found jira ticket in branch name '${JIRA_TAG}'"
-            git notes add -m "Jira ticket: ${JIRA_TAG}"
+            git notes add -m "Jira ticket: ${JIRA_TAG}" ${{ github.sha }}
           else
             echo "No jira ticket in branch name"
           fi
