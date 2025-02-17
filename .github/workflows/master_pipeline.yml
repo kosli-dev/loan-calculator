@@ -142,3 +142,16 @@ jobs:
         run:
           kosli expect deployment
             --environment staging
+
+  jira-ticket-testing:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Find out branch name
+        run: |
+          set -x
+          echo "Branch name: ${{ github.head_ref }}"
+          echo "Commit: ${{ github.sha }}
