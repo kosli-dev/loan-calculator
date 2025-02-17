@@ -1,6 +1,10 @@
 name: 1/3 Main Pipeline
 
 on:
+  workflow_run:
+    workflows: ["Tag with jira ticket"]
+    types:
+      - completed
   push:
   workflow_dispatch:
 

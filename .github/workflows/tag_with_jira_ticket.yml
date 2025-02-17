@@ -1,0 +1,30 @@
+name: Tag with jira ticket
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  on-merge:
+    name: Tag on merge
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == true }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Tag with jira ticket from branch name
+        run: |
+          BRANCH=${{ github.head_ref }}
+          # Jira issue keys consist of [project-key]-[sequential-number]
+          # project key must be at least 2 characters long and start with an uppercase letter
+          # more info: https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectandissuekeys
+          JIRA_TAG=$(echo "$BRANCH" | grep -oE '[A-Z][A-Z0-9]{1,9}-[0-9]+')
+          if [ -n "$JIRA_TAG" ]; then
+            git tag -a "${JIRA_TAG}" -m "Added JIRA tag"
+            git push origin --tags
+            echo "Found jira ticket in branch name '${JIRA_TAG}'"
+          else
+            echo "No jira ticket in branch name"
+          fi
