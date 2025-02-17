@@ -136,12 +136,12 @@ jobs:
           echo YOUR DEPLOYMENT COMMAND HERE
 
 
-      - name: Log deployment to staging in Kosli
-        env:
-          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-        run:
-          kosli expect deployment
-            --environment staging
+#      - name: Log deployment to staging in Kosli
+#        env:
+#          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+#        run:
+#          kosli expect deployment
+#            --environment staging
 
   jira-ticket-testing:
     if: github.event_name == 'pull_request'
