@@ -144,7 +144,7 @@ jobs:
 #            --environment staging
 
   jira-ticket-testing:
-    if: github.event_name == 'pull_request'
+    if: always()  # ${{ github.event_name }} == 'pull_request'
     runs-on: ubuntu-22.04
 
     steps:
@@ -153,5 +153,6 @@ jobs:
       - name: Find out branch name
         run: |
           set -x
+          echo "Event name: ${{ github.event_name }}
           echo "Branch name: ${{ github.head_ref }}"
           echo "Commit: ${{ github.sha }}
