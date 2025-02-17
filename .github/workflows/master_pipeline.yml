@@ -153,6 +153,7 @@ jobs:
       - name: Find out branch name
         env:
           GITHUB_EVENT: ${{ toJSON(github.event) }}
+          GITHUB_ALL: ${{ toJSON(github) }}
         run: |
           set -x
           echo "github.event_name: ${{ github.event_name }}"
@@ -161,4 +162,4 @@ jobs:
           echo "github.event.pull_request: ${{ github.event.pull_request }}"
           echo "github.sha: ${{ github.sha }}"
           set +x
-          echo $GITHUB_EVENT | jq
+          echo $GITHUB_ALL | jq
