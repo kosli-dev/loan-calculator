@@ -10,6 +10,7 @@ on:
 env:
   KOSLI_ORG: kosli
   KOSLI_FLOW: loancalculator
+  KOSLI_TRAIL: ${{ github.sha }}
   KOSLI_CLI_VERSION: "2.11.6"
   IMAGE_NAME: merkely/loancalculator
 
@@ -52,8 +53,6 @@ jobs:
           JIRA_EXISTS=""
           kosli attest jira \
             --name jira \
-            --flow test-jira \
-            --trail run-1 \
             --jira-base-url https://kosli-team.atlassian.net \
             --jira-username tore@kosli.com \
             --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
@@ -62,8 +61,6 @@ jobs:
           if [ "${JIRA_EXISTS}" == "true" ]; then
             kosli attest jira \
               --name jira \
-              --flow test-jira \
-              --trail run-1 \
               --jira-base-url https://kosli-team.atlassian.net \
               --jira-username tore@kosli.com \
               --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
