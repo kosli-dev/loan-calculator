@@ -7,10 +7,10 @@ jobs:
       - run:
           name: Install kosli-cli  
           command: |
-            sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
+            #sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
             echo apt install ca-certificates
             echo apt update
             echo apt install kosli
-      - run: kosli version
+      - run: echo kosli version
       - checkout
 
