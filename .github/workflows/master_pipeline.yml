@@ -10,6 +10,7 @@ on:
 env:
   KOSLI_ORG: kosli
   KOSLI_FLOW: loancalculator
+  KOSLI_TRAIL: ${{ github.sha }}
   KOSLI_CLI_VERSION: "2.11.6"
   IMAGE_NAME: merkely/loancalculator
 
