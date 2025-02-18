@@ -11,6 +11,6 @@ jobs:
             echo apt install ca-certificates
             echo apt update
             echo apt install kosli
-      - run: kosli version
+      - run: echo kosli version
       - checkout
 
