@@ -12,5 +12,4 @@ jobs:
             echo apt update
             echo apt install kosli
       - run: echo kosli version
-      - checkout
 
