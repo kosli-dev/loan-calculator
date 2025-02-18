@@ -10,7 +10,7 @@ on:
 env:
   KOSLI_ORG: kosli
   KOSLI_FLOW: loancalculator
-  KOSLI_CLI_VERSION: "2.6.1"
+  KOSLI_CLI_VERSION: "2.11.6"
   IMAGE_NAME: merkely/loancalculator
 
 jobs:
@@ -47,12 +47,27 @@ jobs:
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
           KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
-        run:
-          kosli report evidence commit jira
-            --jira-base-url https://kosli-test.atlassian.net
-            --jira-username jon@kosli.com
-            --name jira
-
+        run: |
+          set -x
+          JIRA_EXISTS=""
+          kosli attest jira \
+            --name jira \
+            --flow test-jira \
+            --trail run-1 \
+            --jira-base-url https://kosli-team.atlassian.net \
+            --jira-username tore@kosli.com \
+            --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
+            --jira-issue-fields "summary" \
+            --assert --dry-run 2>&1 | grep "no Jira references are found" && JIRA_EXISTS=false || JIRA_EXISTS=true
+          if [ "${JIRA_EXISTS}" == "true" ]; then
+            kosli attest jira \
+              --name jira \
+              --flow test-jira \
+              --trail run-1 \
+              --jira-base-url https://kosli-team.atlassian.net \
+              --jira-username tore@kosli.com \
+              --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
+              --jira-issue-fields "summary,description,creator"            
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -146,24 +161,3 @@ jobs:
 #          kosli expect deployment
 #            --environment staging
 
-  jira-ticket-testing:
-    needs: [build]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Find out branch name
-#        env:
-#          GITHUB_EVENT: ${{ toJSON(github.event) }}
-#          GITHUB_ALL: ${{ toJSON(github) }}
-        run: |
-          set -x
-          git log --show-notes
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "github.ref: ${{ github.ref }}"
-          echo "github.event: ${{ github.event }}"
-          echo "github.event.pull_request: ${{ github.event.pull_request }}"
-          echo "github.sha: ${{ github.sha }}"
-          #set +x
-          #echo $GITHUB_ALL | jq
