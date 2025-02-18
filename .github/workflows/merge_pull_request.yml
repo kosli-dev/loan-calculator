@@ -30,6 +30,7 @@ jobs:
             --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
             --jira-issue-fields "summary" \
             --assert --dry-run 2>&1 | grep "no Jira references are found" && JIRA_EXISTS=false || JIRA_EXISTS=true
+          
           if [ "${JIRA_EXISTS}" == "true" ]; then
             kosli attest jira \
               --name jira \
@@ -39,3 +40,4 @@ jobs:
               --jira-username tore@kosli.com \
               --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
               --jira-issue-fields "summary,description,creator"            
+          fi
