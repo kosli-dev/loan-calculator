@@ -1,8 +1,8 @@
-name: Merge pull request
+name: Kosli base reporting
 
 on:
-  pull_request:
-    types: [closed]
+#  pull_request:
+#    types: [closed]
 
 env:
   KOSLI_ORG: kosli
@@ -13,8 +13,8 @@ env:
 jobs:
   on-merge:
     name: Run on merge
-    runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
