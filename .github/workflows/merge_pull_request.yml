@@ -1,6 +1,7 @@
 name: Kosli base reporting
 
 on:
+  push
 #  pull_request:
 #    types: [closed]
 
