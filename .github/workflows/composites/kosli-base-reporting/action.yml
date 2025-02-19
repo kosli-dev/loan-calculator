@@ -6,7 +6,7 @@ name: Kosli base reporting
 #   https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-get-request
 
 
-#inputs:
+inputs:
   # The Following environment variables must be set in your GitHub action
   # before using this composite
   # env:
@@ -15,6 +15,9 @@ name: Kosli base reporting
   #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
   #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"
   #   KOSLI_CLI_VERSION: 2.11.7
+  github-token:
+    description: "github token"
+    required: true
 #  jira-base-url:
 #    description: "Jira base url for your org (often https://pwc-no-engineering.atlassian.net)"
 #    required: true
@@ -55,6 +58,13 @@ runs:
           --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
           --jira-secondary-source ${{ github.head_ref }} \
           --jira-issue-fields "summary,description"
+
+    - name: Report pull request
+      shell: bash
+      run: |
+        kosli attest pullrequest github \
+          --name pull-request \
+          --github-token ${{ inputs.github-token }}
 
 #    - name: Attest Jira ticket
 #      shell: bash
