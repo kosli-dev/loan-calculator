@@ -14,7 +14,6 @@ env:
 jobs:
   on-merge:
     name: Run on merge
-    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,11 +21,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup cli client
+        if: ${{ github.event.pull_request.merged == true }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ env.KOSLI_CLI_VERSION }}
 
       - name: Report jira ticket to kosli
+        if: ${{ github.event.pull_request.merged == true }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
           KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
