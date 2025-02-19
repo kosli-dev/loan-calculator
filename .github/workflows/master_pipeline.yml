@@ -1,10 +1,7 @@
 name: 1/3 Main Pipeline
 
 on:
-  workflow_run:
-    workflows: ['Kosli base reporting']
-    types: [completed]
-    branches: ['*']
+  push
 
 env:
   KOSLI_ORG: kosli
@@ -20,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Kosli base reporting
+        uses: ./.github/workflows/composites/kosli-base-reporting
+        
 
       - name: Add Docker image names to GITHUB_ENV
         run: |

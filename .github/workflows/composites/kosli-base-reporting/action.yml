@@ -1,0 +1,87 @@
+name: Kosli base reporting
+
+# Attest jira ticket.
+#   https://docs.kosli.com/client_reference/kosli_attest_jira/
+# The possible fields in the jira-issue-fields comes from the Jira API
+#   https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-get-request
+
+
+inputs:
+  # The Following environment variables must be set in your GitHub action
+  # before using this composite
+  # env:
+  #   KOSLI_ORG: PwC
+  #   KOSLI_FLOW: your-flow-name
+  #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
+  #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"
+  #   KOSLI_CLI_VERSION: 2.11.7
+#  jira-base-url:
+#    description: "Jira base url for your org (often https://pwc-no-engineering.atlassian.net)"
+#    required: true
+#  jira-username:
+#    description: "Jira user-name"
+#    required: true
+#  jira-api-token:
+#    description: "Jira API token"
+#    required: true
+#  jira-issue-fields:
+#    description: "List of fields to include from Jira ticket. See comment at top of file."
+#    required: false
+#  report-to-kosli:
+#    description: "Report to kosli if jira ticket exists. Normally set this to 'false' on branches"
+#    required: false
+#    default: "true"
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kosli cli
+      if: ${{ github.event.pull_request.merged == true }}
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version:
+          ${{ env.KOSLI_CLI_VERSION }}
+
+    - name: Report jira ticket to kosli
+      if: ${{ github.event.pull_request.merged == true }}
+      env:
+        KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+        KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
+      shell: bash
+      run: |
+        kosli attest jira \
+          --name jira \
+          --jira-base-url https://kosli-team.atlassian.net \
+          --jira-username tore@kosli.com \
+          --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
+          --jira-secondary-source ${{ github.head_ref }} \
+          --jira-issue-fields "summary,description"
+
+#    - name: Attest Jira ticket
+#      shell: bash
+#      run: |
+#        set -x
+#        JIRA_ISSUE_ARG=""
+#        if [ -n "${{ inputs.jira-issue-fields }}" ]; then
+#          JIRA_ISSUE_ARG="--jira-issue-fields ${{ inputs.jira-issue-fields }}"
+#        fi
+#
+#        if [ "${{ inputs.report-to-kosli }}" == "false" ]; then
+#          # Currently the kosli attest jira command is missing a feature to not report the jira ticket,
+#          # so use a grep for now
+#          kosli attest jira \
+#            --name jira-ticket \
+#            --jira-base-url ${{ inputs.jira-base-url }} \
+#            --jira-username ${{ inputs.jira-username }} \
+#            --jira-api-token ${{ inputs.jira-api-token }} \
+#            --assert --dry-run 2>&1 | grep "no Jira references are found" && exit 1 || exit 0
+#        else
+#          kosli attest jira \
+#            --name jira-ticket \
+#            --jira-base-url ${{ inputs.jira-base-url }} \
+#            --jira-username ${{ inputs.jira-username }} \
+#            --jira-api-token ${{ inputs.jira-api-token }} \
+#            --assert \
+#            ${JIRA_ISSUE_ARG}
+#        fi
