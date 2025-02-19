@@ -11,7 +11,7 @@ env:
   KOSLI_ORG: kosli
   KOSLI_FLOW: loancalculator
   KOSLI_TRAIL: ${{ github.sha }}
-  KOSLI_CLI_VERSION: "2.11.6"
+  KOSLI_CLI_VERSION: "2.11.7"
   IMAGE_NAME: merkely/loancalculator
 
 jobs:
@@ -43,29 +43,6 @@ jobs:
             --template "jira,artifact,unit_test,coverage"
             --visibility public
 
-
-      - name: Report jira ticket to kosli
-        env:
-          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-          KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
-        run: |
-          set -x
-          JIRA_EXISTS=""
-          kosli attest jira \
-            --name jira \
-            --jira-base-url https://kosli-team.atlassian.net \
-            --jira-username tore@kosli.com \
-            --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
-            --jira-issue-fields "summary" \
-            --assert --dry-run 2>&1 | grep "no Jira references are found" && JIRA_EXISTS=false || JIRA_EXISTS=true
-          if [ "${JIRA_EXISTS}" == "true" ]; then
-            kosli attest jira \
-              --name jira \
-              --jira-base-url https://kosli-team.atlassian.net \
-              --jira-username tore@kosli.com \
-              --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
-              --jira-issue-fields "summary,description,creator"            
-          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
