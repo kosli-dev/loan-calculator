@@ -1,25 +1,25 @@
-name: Kosli base reporting
-
-on:
-  push
+#name: Kosli base reporting
+#
+#on:
+#  push
 #  pull_request:
 #    types: [closed]
-
-env:
-  KOSLI_ORG: kosli
-  KOSLI_FLOW: loancalculator
-  KOSLI_TRAIL: ${{ github.sha }}
-  KOSLI_CLI_VERSION: "2.11.7"
-
-jobs:
-  on-merge:
-    name: Run on merge
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
+#
+#env:
+#  KOSLI_ORG: kosli
+#  KOSLI_FLOW: loancalculator
+#  KOSLI_TRAIL: ${{ github.sha }}
+#  KOSLI_CLI_VERSION: "2.11.7"
+#
+#jobs:
+#  on-merge:
+#    name: Run on merge
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#
 #      - name: Setup cli client
 #        if: ${{ github.event.pull_request.merged == true }}
 #        uses: kosli-dev/setup-cli-action@v2

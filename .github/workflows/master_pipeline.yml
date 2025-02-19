@@ -1,10 +1,7 @@
 name: 1/3 Main Pipeline
 
 on:
-  workflow_run:
-    workflows: ['Kosli base reporting']
-    types: [completed]
-    branches: ['*']
+  push
 
 env:
   KOSLI_ORG: kosli
@@ -20,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Kosli base reporting
+        uses: ./.github/workflows/composites/kosli-base-reporting
+        
 
       - name: Add Docker image names to GITHUB_ENV
         run: |
@@ -28,6 +28,7 @@ jobs:
 
 
       - name: Setup cli client
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ env.KOSLI_CLI_VERSION }}
@@ -58,12 +59,14 @@ jobs:
 
       - name: Make the image digest available for following steps
         id: digest-prep
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           ARTIFACT_SHA=$( echo ${{ steps.docker_build.outputs.digest }} | sed 's/.*://')
           echo "KOSLI_FINGERPRINT=$ARTIFACT_SHA" >> ${GITHUB_ENV}
 
 
       - name: Log Docker image in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -83,6 +86,7 @@ jobs:
 
 
       - name: Log unit test results in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -105,6 +109,7 @@ jobs:
 
 
       - name: Log coverage results in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -112,6 +117,9 @@ jobs:
             --description "${{ env.COVERAGE_SUMMARY }}"
             --name coverage
 
+      - name: New extra step
+        run: |
+          echo A new extra step to see if it is triggered correctly on branch
 
       - name: Deploy to staging
         run: |
