@@ -1,7 +1,9 @@
 name: 1/3 Main Pipeline
 
 on:
-  push
+  push:
+  pull_request:
+    types: [closed]
 
 env:
   KOSLI_ORG: kosli
@@ -9,36 +11,45 @@ env:
   KOSLI_TRAIL: ${{ github.sha }}
   KOSLI_CLI_VERSION: "2.11.7"
   IMAGE_NAME: merkely/loancalculator
+  KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      PR_CLOSE_EVENT: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
+      PUSH_EVENT: ${{ github.event_name == 'push' }}
+      PUSH_MAIN_EVENT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
     steps:
       - uses: actions/checkout@v2
       
       - name: Kosli base reporting
+        if: ${{ env.PR_CLOSE_EVENT == 'true' }}
         uses: ./.github/workflows/composites/kosli-base-reporting
         
 
       - name: Add Docker image names to GITHUB_ENV
+        if: ${{ env.PUSH_EVENT == 'true' }}
         run: |
           echo "IMAGE_TAGGED=${{ env.IMAGE_NAME }}:$(git log -1 --pretty=%h)" >> ${GITHUB_ENV}
           echo "IMAGE_LATEST=${{ env.IMAGE_NAME }}:latest" >> ${GITHUB_ENV}
 
 
       - name: Setup cli client
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ env.KOSLI_CLI_VERSION }}
 
 
       - name: Set up Docker Buildx
+        if: ${{ env.PUSH_EVENT == 'true' }}
         uses: docker/setup-buildx-action@v1
 
 
       - name: Login to DockerHub
+        if: ${{ env.PUSH_EVENT == 'true' }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_DEPLOY_USERNAME }}
@@ -46,6 +57,7 @@ jobs:
 
 
       - name: Build and push Docker image
+        if: ${{ env.PUSH_EVENT == 'true' }}
         id: docker_build
         uses: docker/build-push-action@v2
         with:
@@ -59,14 +71,14 @@ jobs:
 
       - name: Make the image digest available for following steps
         id: digest-prep
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         run: |
           ARTIFACT_SHA=$( echo ${{ steps.docker_build.outputs.digest }} | sed 's/.*://')
           echo "KOSLI_FINGERPRINT=$ARTIFACT_SHA" >> ${GITHUB_ENV}
 
 
       - name: Log Docker image in Kosli
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -74,6 +86,7 @@ jobs:
 
 
       - name: Run unit tests
+        if: ${{ env.PUSH_EVENT == 'true' }}
         run: |
           # Write results to ./build/test/
           docker run \
@@ -86,7 +99,7 @@ jobs:
 
 
       - name: Log unit test results in Kosli
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -96,6 +109,7 @@ jobs:
 
 
       - name: Run coverage
+        if: ${{ env.PUSH_EVENT == 'true' }}
         run: |
           # Write summary to build/coverage/coverage_summary.sh
           mkdir -p build/coverage
@@ -109,7 +123,7 @@ jobs:
 
 
       - name: Log coverage results in Kosli
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -117,11 +131,8 @@ jobs:
             --description "${{ env.COVERAGE_SUMMARY }}"
             --name coverage
 
-      - name: New extra step
-        run: |
-          echo A new extra step to see if it is triggered correctly on branch
-
       - name: Deploy to staging
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
         run: |
           echo YOUR DEPLOYMENT COMMAND HERE
 
