@@ -112,6 +112,9 @@ jobs:
             --description "${{ env.COVERAGE_SUMMARY }}"
             --name coverage
 
+      - name: New extra step
+        run: |
+          echo A new extra step to see if it is triggered correctly on branch
 
       - name: Deploy to staging
         run: |
