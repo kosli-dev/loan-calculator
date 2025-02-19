@@ -37,7 +37,7 @@ jobs:
 
 
       - name: Setup cli client
-        if: ${{ env.PUSH_VENT == 'true' }}
+        if: ${{ env.PUSH_EVENT == 'true' }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ env.KOSLI_CLI_VERSION }}
