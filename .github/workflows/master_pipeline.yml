@@ -133,6 +133,7 @@ jobs:
       - name: Assert jira ticket
         if: ${{ env.PUSH_EVENT == 'true' }}
         run: |
+          set -x
           kosli attest jira \
             --name jira \
             --jira-base-url https://kosli-team.atlassian.net \
