@@ -13,14 +13,13 @@ env:
   KOSLI_CLI_VERSION: "2.11.7"
   IMAGE_NAME: merkely/loancalculator
   KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
+  PR_CLOSE_EVENT: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
+  PUSH_EVENT: ${{ github.event_name == 'push' }}
+  PUSH_MAIN_EVENT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    env:
-      PR_CLOSE_EVENT: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
-      PUSH_EVENT: ${{ github.event_name == 'push' }}
-      PUSH_MAIN_EVENT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
     steps:
       - uses: actions/checkout@v2
