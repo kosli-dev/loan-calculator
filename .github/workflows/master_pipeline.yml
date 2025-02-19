@@ -28,6 +28,7 @@ jobs:
 
 
       - name: Setup cli client
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ env.KOSLI_CLI_VERSION }}
@@ -58,12 +59,14 @@ jobs:
 
       - name: Make the image digest available for following steps
         id: digest-prep
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           ARTIFACT_SHA=$( echo ${{ steps.docker_build.outputs.digest }} | sed 's/.*://')
           echo "KOSLI_FINGERPRINT=$ARTIFACT_SHA" >> ${GITHUB_ENV}
 
 
       - name: Log Docker image in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -83,6 +86,7 @@ jobs:
 
 
       - name: Log unit test results in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
@@ -105,6 +109,7 @@ jobs:
 
 
       - name: Log coverage results in Kosli
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
         run:
