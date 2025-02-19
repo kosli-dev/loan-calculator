@@ -1,8 +1,9 @@
-name: Merge pull request
+name: Kosli base reporting
 
 on:
-  pull_request:
-    types: [closed]
+  push
+#  pull_request:
+#    types: [closed]
 
 env:
   KOSLI_ORG: kosli
@@ -14,26 +15,27 @@ jobs:
   on-merge:
     name: Run on merge
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged == true }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup cli client
-        uses: kosli-dev/setup-cli-action@v2
-        with:
-          version: ${{ env.KOSLI_CLI_VERSION }}
-
-      - name: Report jira ticket to kosli
-        env:
-          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-          KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
-        run: |
-          kosli attest jira \
-            --name jira \
-            --jira-base-url https://kosli-team.atlassian.net \
-            --jira-username tore@kosli.com \
-            --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
-            --jira-secondary-source ${{ github.head_ref }} \
-            --jira-issue-fields "summary,description"
+#      - name: Setup cli client
+#        if: ${{ github.event.pull_request.merged == true }}
+#        uses: kosli-dev/setup-cli-action@v2
+#        with:
+#          version: ${{ env.KOSLI_CLI_VERSION }}
+#
+#      - name: Report jira ticket to kosli
+#        if: ${{ github.event.pull_request.merged == true }}
+#        env:
+#          KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+#          KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
+#        run: |
+#          kosli attest jira \
+#            --name jira \
+#            --jira-base-url https://kosli-team.atlassian.net \
+#            --jira-username tore@kosli.com \
+#            --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
+#            --jira-secondary-source ${{ github.head_ref }} \
+#            --jira-issue-fields "summary,description"
