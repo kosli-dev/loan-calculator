@@ -130,6 +130,16 @@ jobs:
         run: |
           echo YOUR DEPLOYMENT COMMAND HERE
 
+      - name: Assert jira ticket
+        if: ${{ env.PUSH_MAIN_EVENT == 'true' }}
+        run: |
+          kosli attest jira \
+            --name jira \
+            --jira-base-url https://kosli-team.atlassian.net \
+            --jira-username tore@kosli.com \
+            --jira-api-token ${KOSLI_JIRA_API_TOKEN} \
+            --assert --dry-run 2>&1 | grep "no Jira references are found" && exit 1 || exit 0
+          
 #      - name: Log deployment to staging in Kosli
 #        run:
 #          kosli expect deployment
