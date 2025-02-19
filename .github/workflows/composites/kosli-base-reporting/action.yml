@@ -45,9 +45,9 @@ runs:
 
     - name: Report jira ticket to kosli
       if: ${{ github.event.pull_request.merged == true }}
-      env:
-        KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-        KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
+#      env:
+#        KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+#        KOSLI_JIRA_API_TOKEN: ${{ secrets.KOSLI_JIRA_API_TOKEN }}
       shell: bash
       run: |
         kosli attest jira \
