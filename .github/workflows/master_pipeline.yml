@@ -27,7 +27,8 @@ jobs:
       - name: Kosli base reporting
         if: ${{ env.PR_CLOSE_EVENT == 'true' }}
         uses: ./.github/workflows/composites/kosli-base-reporting
-        
+          with:
+            github-token: ${{ secrets.github-token }}
 
       - name: Add Docker image names to GITHUB_ENV
         if: ${{ env.PUSH_EVENT == 'true' }}
