@@ -1,0 +1,45 @@
+name: Kosli Begin Trail
+
+# Begins a trail in a kosli flow.
+#   https://docs.kosli.com/client_reference/kosli_begin_trail/
+# The kosli-template-file contains a list of your expected artifacts and
+# attestations. If you are just starting to set up a build pipeline
+# and are uncertain what it will contain then just start without it.
+# The template file is documented here:
+#   https://docs.kosli.com/template_ref/
+
+inputs:
+  # The Following environment variables should be set in your GitHub action
+  # before using this composite
+  # env:
+  #   KOSLI_ORG: kosli
+  #   KOSLI_FLOW: your-flow-name
+  #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"  
+  #   KOSLI_CLI_VERSION: 2.11.6
+  kosli-trail:
+    description: "Kosli trail name (often git-commit-sha)"
+    required: true
+  kosli-template-file:
+    description: "Kosli template file"
+    required: false
+    
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kosli cli
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version:
+          ${{ env.KOSLI_CLI_VERSION }}
+
+    - name: Begin trail
+      shell: bash
+      run: |
+        TEMPLATE_FILE_ARG=""
+        if [ -n "${{ inputs.kosli-template-file }}" ]; then
+          TEMPLATE_FILE_ARG="--template-file ${{ inputs.kosli-template-file }}"
+        fi
+
+        echo "Run kosli begin trail with ORG: '${KOSLI_ORG}' FLOW: '${KOSLI_FLOW}' TRAIL: '${{ inputs.kosli-trail }}'' TEMPLATE-FILE: '${{ inputs.kosli-template-file }}'"
+        kosli begin trail ${{ inputs.kosli-trail }} ${TEMPLATE_FILE_ARG}

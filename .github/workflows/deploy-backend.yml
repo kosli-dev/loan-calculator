@@ -1,0 +1,400 @@
+name: Deploy Backend
+
+on:
+  push:
+    paths: ["apps/backend/**", ".github/workflows/deploy-backend.yml"]
+  workflow_dispatch:
+
+env:
+  # kosli commands picks up org, flow, trail and api-token from these environment variables
+  KOSLI_ORG: kosli
+  KOSLI_FLOW: backend
+  KOSLI_TRAIL: ${{ github.sha }}
+  KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"
+  KOSLI_CLI_VERSION: "2.11.8"
+  KOSLI_TEMPLATE_FILE: "apps/backend/kosli-template.yml"
+  # KOSLI_DRY_RUN: true
+  VERACODE_API_KEY_ID: ${{ secrets.VERACODE_API_ID }}
+  VERACODE_API_KEY_SECRET: ${{ secrets.VERACODE_API_KEY }}
+  JIRA_BASE_URL: "https://kosli-team.atlassian.net"
+  JIRA_USERNAME: "tore@kosli.com"
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+  TGZ_FILE_API: api-${{ github.sha }}.tgz
+  TGZ_FILE_FUNCTIONS: functions-${{ github.sha }}.tgz
+  AZURE_BLOB_CONTAINER_NAME: artifacts
+  AZURE_BLOB_PATH_API: "loan-calculator/api"
+  AZURE_BLOB_PATH_FUNCTIONS: "loan-calculator/functions"
+
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Begin trail
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ./.github/workflows/composites/kosli-begin-trail
+        with:
+          kosli-trail: ${{ env.KOSLI_TRAIL }}
+          kosli-template-file: ${{ env.KOSLI_TEMPLATE_FILE }} 
+
+    
+  build-api:
+    name: Build API
+    needs: setup
+    runs-on: ubuntu-latest
+    outputs:
+      fingerprint: ${{ steps.calculate_fingerprint.outputs.fingerprint }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Build API
+        run: dotnet build apps/backend/loan-calculator.API -o build/api
+           
+      - name: Dir upload and attest artifact
+        id: calculate_fingerprint
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ./.github/workflows/composites/kosli-dir-upload-and-attest-artifact
+        with:
+          kosli-artifact-template-name: api
+          artifact-env-name: wezzajjgadwa0002
+          artifact-dir: build/api
+          artifact-tar-name: ${{ env.TGZ_FILE_API }}
+
+  build-functions:
+    name: Build functions
+    needs: setup
+    runs-on: ubuntu-latest
+    outputs:
+      fingerprint: ${{ steps.calculate_fingerprint.outputs.fingerprint }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Build Functions
+        run: dotnet build apps/backend/loan-calculator.Functions -o build/functions
+
+      - name: Dir upload and attest artifact
+        id: calculate_fingerprint
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ./.github/workflows/composites/kosli-dir-upload-and-attest-artifact
+        with:
+          kosli-artifact-template-name: functions
+          artifact-env-name: wezzajjgadwa0001
+          artifact-dir: build/functions
+          artifact-tar-name: ${{ env.TGZ_FILE_FUNCTIONS }}
+
+  upload-to-azure-blob:
+    name: Upload to azure blob
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [build-api, build-functions]
+    runs-on:
+      group: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TGZ_FILE_API }}
+
+      - name: Upload API to Azure Blob Storage
+        run: |
+          set -x
+          az storage blob upload \
+            --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+            --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+            --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+            --file ${{ env.TGZ_FILE_API }} \
+            --name ${{ env.AZURE_BLOB_PATH_API }}/${{ env.TGZ_FILE_API }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TGZ_FILE_FUNCTIONS }}
+
+      - name: Upload functions to Azure Blob Storage
+        run: |
+          set -x
+          az storage blob upload \
+            --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+            --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+            --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+            --file ${{ env.TGZ_FILE_FUNCTIONS }} \
+            --name ${{ env.AZURE_BLOB_PATH_FUNCTIONS }}/${{ env.TGZ_FILE_FUNCTIONS }}
+          
+  tests-repo:
+    name: Repo tests
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Run repo tests
+        continue-on-error: true
+        run: dotnet test apps/backend/loan-calculator.Repositories.Tests 
+          --output test/repo
+          --logger "junit;LogFilePath=${PWD}/test/repo/junit/TestResults.xml"
+        
+      - name: Setup Kosli cli
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            ${{ env.KOSLI_CLI_VERSION }}
+          
+      - name: Attest repo tests
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        run:
+          kosli attest junit
+            --name repo-tests
+            --results-dir test/repo/junit
+
+  jira-ticket:
+    name: Jira ticket
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attest jira ticket
+        uses: ./.github/workflows/composites/kosli-attest-jira
+        with:
+          jira-base-url: ${{ env.JIRA_BASE_URL }}
+          jira-username: ${{ env.JIRA_USERNAME }}
+          jira-api-token: ${{ env.JIRA_API_TOKEN }}
+          jira-issue-fields: "summary,description"
+          report-to-kosli: ${{ github.ref == 'refs/heads/main' }}
+
+  pull-request:
+    name: Pull-request
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attest GitHub pull-request
+        uses: ./.github/workflows/composites/kosli-attest-pullrequest
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          assert: true
+
+  tests-api:
+    name: API tests
+    needs: build-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Run API tests
+        run: dotnet test apps/backend/loan-calculator.API.Tests
+          --output test/api
+          --logger "junit;LogFilePath=${PWD}/test/api/junit/TestResults.xml"
+
+      - name: Setup Kosli cli
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            ${{ env.KOSLI_CLI_VERSION }}
+
+      - name: Attest API tests
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        run:
+          kosli attest junit
+          --name api.unit-tests
+          --results-dir test/api/junit
+          --fingerprint ${{ needs.build-api.outputs.fingerprint }}
+
+  tests-functions:
+    name: Functions tests
+    needs: build-functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Run Functions tests
+        run: dotnet test apps/backend/loan-calculator.Functions.Tests
+          --output test/functions
+          --logger "junit;LogFilePath=${PWD}/test/functions/junit/TestResults.xml"
+
+      - name: Setup Kosli cli
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            ${{ env.KOSLI_CLI_VERSION }}
+
+      - name: Attest Functions tests
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        run:
+          kosli attest junit
+          --name functions.unit-tests
+          --results-dir test/functions/junit
+          --fingerprint ${{ needs.build-functions.outputs.fingerprint }}
+
+
+  veracode-static-scan-api:
+    name: Veracode static scan of api
+    needs: build-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Setup Veracode CLI
+        run:
+          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+          
+      - name: Veracode static scan
+        run: |
+          set -x
+          dotnet build apps/backend/loan-calculator.API -c Debug -o build-debug/api
+          zip build-debug/api.zip build-debug/api/*
+          ./veracode static scan --results-file=build-debug/static-scan-api.json build-debug/api.zip
+
+      - name: Attest Veracode static scan
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        uses: ./.github/workflows/composites/kosli-attest-veracode
+        with:
+          kosli-artifact-template-name: api
+          artifact-fingerprint: ${{ needs.build-api.outputs.fingerprint }}
+          veracode-results-file: build-debug/static-scan-api.json
+
+
+  veracode-static-scan-functions:
+    name: Veracode static scan of functions
+    needs: build-functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.x"
+
+      - name: Setup Veracode CLI
+        run:
+          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+
+      - name: Veracode static scan
+        run: |
+          set -x
+          dotnet build apps/backend/loan-calculator.Functions -c Debug -o build-debug/functions
+          zip build-debug/functions.zip build-debug/functions/*
+          ./veracode static scan --results-file=build-debug/static-scan-functions.json build-debug/functions.zip
+
+      - name: Attest Veracode static scan
+        if: ${{ github.ref == 'refs/heads/main' && always() }}
+        uses: ./.github/workflows/composites/kosli-attest-veracode
+        with:
+          kosli-artifact-template-name: functions
+          artifact-fingerprint: ${{ needs.build-functions.outputs.fingerprint }}
+          veracode-results-file: build-debug/static-scan-functions.json
+
+
+  assert-artifacts:
+    name: Assert artifacts
+    if: ${{ github.ref == 'refs/heads/main' && always() }}
+    needs: [build-api, build-functions, jira-ticket, pull-request, tests-repo, tests-api, tests-functions, 
+            veracode-static-scan-api, veracode-static-scan-functions]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Kosli cli
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            ${{ env.KOSLI_CLI_VERSION }}
+          
+      - name: Assert Artifacts
+        run: |
+          set -x
+          EXIT_CODE=0
+          kosli assert artifact --fingerprint ${{ needs.build-api.outputs.fingerprint }} || EXIT_CODE=1
+          kosli assert artifact --fingerprint ${{ needs.build-functions.outputs.fingerprint }} || EXIT_CODE=1
+          exit ${EXIT_CODE}
+
+
+  deploy-api-dev:
+    name: Deploy API development
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [upload-to-azure-blob, assert-artifacts]
+    environment: Development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download from Azure Blob Storage
+        run: |
+          set -x
+          az storage blob download \
+            --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+            --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+            --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+            --file ${{ env.TGZ_FILE_API }} \
+            --name ${{ env.AZURE_BLOB_PATH_API }}/${{ env.TGZ_FILE_API }}
+          tar xf ${{ env.TGZ_FILE_API }}          
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy API
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: api0002
+          package: api
+          startup-command: "dotnet loan-calculator.API.dll"
+
+
+  deploy-functions-dev:
+    name: Deploy functions development
+    needs: [upload-to-azure-blob, assert-artifacts]
+    environment: Development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download from Azure Blob Storage
+        run: |
+          set -x
+          az storage blob download \
+            --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+            --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+            --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+            --file ${{ env.TGZ_FILE_FUNCTIONS }} \
+            --name ${{ env.AZURE_BLOB_PATH_FUNCTIONS }}/${{ env.TGZ_FILE_FUNCTIONS }}
+          tar xf ${{ env.TGZ_FILE_FUNCTIONS }}          
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+      - name: Deploy Functions
+        id: deploy-functions
+        uses: azure/functions-action@v1
+        with:
+          app-name: functions00001
+          package: functions

@@ -1,0 +1,44 @@
+name: Kosli Attest GitHub Pull-request
+
+# Attest pull-request.
+#   https://docs.kosli.com/client_reference/kosli_attest_pullrequest_github/
+
+
+inputs:
+  # The Following environment variables must be set in your GitHub action
+  # before using this composite
+  # env:
+  #   KOSLI_ORG: kosli
+  #   KOSLI_FLOW: your-flow-name
+  #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
+  #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}" 
+  #   KOSLI_CLI_VERSION: 2.11.6
+  assert:
+    description: "Exit with non-zero code if no pull requests found"
+    required: false
+  github-token:
+    description: "Github token: secrets.GITHUB_TOKEN"
+    required: true
+    
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kosli cli
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version:
+          ${{ env.KOSLI_CLI_VERSION }}
+
+    - name: Attest Github pull-request
+      shell: bash
+      run: |
+        set -x
+        ASSERT_ARG=""
+        if [ "${{ inputs.assert }}" == "true" ]; then
+          ASSERT_ARG="--assert=${{ inputs.assert }}"
+        fi
+        
+        kosli attest pullrequest github \
+          --name pull-request \
+          --github-token ${{ inputs.github-token }} \
+          ${ASSERT_ARG}

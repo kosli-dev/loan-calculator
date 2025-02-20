@@ -1,0 +1,85 @@
+name: Kosli dir upload and attest artifact
+
+# Input is an artifact-directory that contains SW that shall be deployed at some later stage.
+# - Calculates the fingerprint of the content in the directory.
+# - Creates a tar-ball of the directory and uploads it to GitHub action storage.
+# - Attest to kosli that an artifact with given fingerprint has been created.
+#     https://docs.kosli.com/client_reference/kosli_attest_artifact/
+
+inputs:
+  # The Following environment variables must be set in your GitHub action
+  # before using this composite
+  # env:
+  #   KOSLI_ORG: kosli
+  #   KOSLI_FLOW: your-flow-name
+  #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
+  #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"  
+  #   KOSLI_CLI_VERSION: 2.11.6
+  kosli-artifact-template-name:
+    description: "Name of the artifact in kosli template-file. Often something generic like 'frontend'"
+    required: true
+  artifact-env-name:
+    description: "Name of the artifact used when running in an environment. Often something like 'wezzajjgadwa0005'"
+    required: true    
+  artifact-dir:
+    description: "Directory where artifact is stored"
+    required: true
+  artifact-tar-name:
+    description: "Name of artifact tar-file. The name often include commit-sha"
+    required: true
+  debug:
+    description: "Set to true to include more debugging information. Including fingerprint calculation of artifact"
+    required: false
+
+outputs:
+  fingerprint:
+    description: "Fingerprint of artifact"
+    value: ${{ steps.calculate_fingerprint.outputs.fingerprint }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kosli cli
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version:
+          ${{ env.KOSLI_CLI_VERSION }}
+
+    - name: Calculate fingerprint
+      shell: bash
+      id: calculate_fingerprint
+      run: |
+        set -x
+        ARTIFACT_FINGERPRINT=$(kosli fingerprint --artifact-type dir ${{ inputs.artifact-dir }})
+        echo "KOSLI_FINGERPRINT=${ARTIFACT_FINGERPRINT}" >> $GITHUB_ENV
+        echo "fingerprint=${ARTIFACT_FINGERPRINT}" >> $GITHUB_OUTPUT
+        echo "Calculated fingerprint: ${ARTIFACT_FINGERPRINT}"
+        if [ "${{ inputs.debug }}" == "true" ]; then
+            kosli fingerprint --artifact-type dir ${{ inputs.artifact-dir }} --debug
+        fi
+
+    - name: tar artifact
+      shell: bash
+      run: |
+        set -x
+        FULL_DIR=${{ inputs.artifact-dir }}
+        PARENT_DIR="${FULL_DIR%/*}"
+        LAST_DIR="${FULL_DIR##*/}"
+        VERBOSE=""
+        if [ "${{ inputs.debug }}" == "true" ]; then
+            VERBOSE=v
+        fi
+        tar zcf${VERBOSE} ${{ inputs.artifact-tar-name }} -C ${PARENT_DIR} ${LAST_DIR}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-tar-name }}
+        path: ${{ inputs.artifact-tar-name }}
+
+    - name: Attest artifact
+      shell: bash
+      run: |
+        set -x
+        kosli attest artifact ${{ inputs.artifact-env-name }} \
+        --name ${{ inputs.kosli-artifact-template-name }} \
+        --fingerprint ${{ env.KOSLI_FINGERPRINT }}

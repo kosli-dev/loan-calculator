@@ -1,0 +1,165 @@
+name: Deploy Frontend
+
+on:
+  push:
+    paths: ["apps/frontend/**", ".github/workflows/deploy-frontend.yml"]
+  workflow_dispatch:
+
+env:
+  # kosli commands picks up org, flow, trail and api-token from these environment variables
+  KOSLI_ORG: kosli
+  KOSLI_FLOW: frontend
+  KOSLI_TRAIL: ${{ github.sha }}
+  KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"
+  KOSLI_CLI_VERSION: "2.11.8"
+  KOSLI_TEMPLATE_FILE: "apps/frontend/kosli-template.yml"
+  # KOSLI_DRY_RUN: true
+  JIRA_BASE_URL: "https://kosli-team.atlassian.net"
+  JIRA_USERNAME: "tore@kosli.com"
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+  TGZ_FILE: frontend-${{ github.sha }}.tgz
+  AZURE_BLOB_CONTAINER_NAME: artifacts
+  AZURE_BLOB_PATH: "loan-calculator/frontend"
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Begin trail
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ./.github/workflows/composites/kosli-begin-trail
+        with:
+          kosli-trail: ${{ env.KOSLI_TRAIL }}
+          kosli-template-file: ${{ env.KOSLI_TEMPLATE_FILE }}
+    
+  build:
+    name: Build application
+    needs: setup
+    runs-on: ubuntu-latest
+    outputs:
+      fingerprint: ${{ steps.calculate_fingerprint.outputs.fingerprint }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: "npm install and build"
+        working-directory: apps/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Dir upload and attest artifact
+        id: calculate_fingerprint
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ./.github/workflows/composites/kosli-dir-upload-and-attest-artifact
+        with:
+          kosli-artifact-template-name: frontend
+          artifact-env-name: wezzajjgadwa0005
+          artifact-dir: apps/frontend/dist/loan-calculatorSPA/browser
+          artifact-tar-name: ${{ env.TGZ_FILE }}
+
+  upload-to-azure-blob:
+    name: Upload to azure blob
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TGZ_FILE }}
+  
+      - name: Upload to Azure Blob Storage
+        run: |
+          set -x
+            az storage blob upload \
+              --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+              --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+              --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+              --file ${{ env.TGZ_FILE }} \
+              --name ${{ env.AZURE_BLOB_PATH }}/${{ env.TGZ_FILE }}
+
+  jira-ticket:
+    name: Jira ticket
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attest jira ticket
+        uses: ./.github/workflows/composites/kosli-attest-jira
+        with:
+          jira-base-url: ${{ env.JIRA_BASE_URL }}
+          jira-username: ${{ env.JIRA_USERNAME }}
+          jira-api-token: ${{ env.JIRA_API_TOKEN }}
+          jira-issue-fields: "summary,description"
+          report-to-kosli: ${{ github.ref == 'refs/heads/main' }}
+
+  pull-request:
+    name: Pull-request
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attest github pull-request
+        uses: ./.github/workflows/composites/kosli-attest-pullrequest
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          assert: true
+
+  assert-artifacts:
+    name: Assert artifacts
+    if: ${{ github.ref == 'refs/heads/main' && always() }}
+    needs: [build, upload-to-azure-blob, jira-ticket, pull-request]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Kosli cli
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            ${{ env.KOSLI_CLI_VERSION }}
+
+      - name: Assert Artifacts
+        run: |
+          set -x
+          EXIT_CODE=0
+          kosli assert artifact --fingerprint ${{ needs.build.outputs.fingerprint }} || EXIT_CODE=1
+          exit ${EXIT_CODE}
+          
+  deploy-dev:
+    name: Deploy development
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [assert-artifacts]
+    environment: Development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download from Azure Blob Storage
+        run: |
+          set -x
+          az storage blob download \
+            --account-name ${{ vars.AZURE_STORAGE_ARTIFACT_ACCOUNT_NAME }} \
+            --container-name ${{ env.AZURE_BLOB_CONTAINER_NAME }} \
+            --sas-token "${{ secrets.AZURE_STORAGE_ARTIFACT_SAS_TOKEN }}" \
+            --file ${{ env.TGZ_FILE }} \
+            --name ${{ env.AZURE_BLOB_PATH }}/${{ env.TGZ_FILE }}
+          tar xf ${{ env.TGZ_FILE }}
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: frontend0005
+          package: browser
+          startup-command: "pm2 serve /home/site/wwwroot --no-daemon --spa"

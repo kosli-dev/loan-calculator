@@ -1,0 +1,52 @@
+name: Kosli Attest Veracode
+
+# Attest Veracode result.
+#   https://docs.kosli.com/client_reference/kosli_attest_junit/
+
+
+inputs:
+  # The Following environment variables must be set in your GitHub action
+  # before using this composite
+  # env:
+  #   KOSLI_ORG: kosli
+  #   KOSLI_FLOW: your-flow-name
+  #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
+  #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"  
+  #   KOSLI_CLI_VERSION: 2.11.6
+  kosli-artifact-template-name:
+    description: "Name of the artifact in kosli template-file. Often something generic like 'frontend'"
+    required: true
+  artifact-fingerprint:
+    description: "Fingerprint of artifact"
+    required: true
+  veracode-results-file:
+    description: "Veracode results-file"
+    required: true
+    
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kosli cli
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version:
+          ${{ env.KOSLI_CLI_VERSION }}
+
+    - name: Attest Veracode junit result
+      shell: bash
+      run: |
+        set -x
+        SCAN_STATUS=$(jq -r .scan_status ${{ inputs.veracode-results-file }})
+        COMPLIANT=$([ "$SCAN_STATUS" == "SUCCESS" ] && echo true || echo false)
+        RES_STRING=$(jq -r .message ${{ inputs.veracode-results-file }})
+        
+        echo SCAN_STATUS=${SCAN_STATUS}
+        echo COMPLIANT=${COMPLIANT}
+        cat ${{ inputs.veracode-results-file }}
+        
+        kosli attest generic \
+          --name ${{ inputs.kosli-artifact-template-name }}.veracode-static-scan \
+          --fingerprint ${{ inputs.artifact-fingerprint }} \
+          --compliant=${COMPLIANT} \
+          --annotate "result=${RES_STRING}"

@@ -10,7 +10,7 @@ inputs:
   # The Following environment variables must be set in your GitHub action
   # before using this composite
   # env:
-  #   KOSLI_ORG: PwC
+  #   KOSLI_ORG: kosli
   #   KOSLI_FLOW: your-flow-name
   #   KOSLI_TRAIL: your-trail-name (often git-commit-sha)
   #   KOSLI_API_TOKEN: "${{ secrets.KOSLI_API_TOKEN }}"
@@ -19,7 +19,7 @@ inputs:
     description: "github token"
     required: true
 #  jira-base-url:
-#    description: "Jira base url for your org (often https://pwc-no-engineering.atlassian.net)"
+#    description: "Jira base url for your org (often https://kosli-team.atlassian.net)"
 #    required: true
 #  jira-username:
 #    description: "Jira user-name"
